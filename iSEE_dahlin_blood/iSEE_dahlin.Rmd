@@ -87,3 +87,137 @@ iSEE(sce)
 
 
 
+## GSE107727
+
+https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE107727
+-> https://www.ncbi.nlm.nih.gov/sra?term=SRP126188
+
+To determine the transcriptional landscape of mouse HSPCs in normal and perturbed haematopoiesis.
+
+Downloading the raw data and uncompressing the folder...
+
+```{r}
+download.file("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE107727&format=file",
+              destfile = "GSE107727_RAW.tar")
+
+# manually untarring -.-
+```
+
+### Reading in the 6 files - SIGAB1-SIGAH1
+
+```{r}
+library(SingleCellExperiment)
+
+# cm <- read.table("MINITEST.txt",sep = "\t")
+
+cm_SIGAB1 <- read.table("GSE107727_RAW/GSM2877127_SIGAB1_counts.txt.gz", sep = "\t")
+cm_SIGAC1 <- read.table("GSE107727_RAW/GSM2877128_SIGAC1_counts.txt.gz", sep = "\t")
+cm_SIGAD1 <- read.table("GSE107727_RAW/GSM2877129_SIGAD1_counts.txt.gz", sep = "\t")
+cm_SIGAF1 <- read.table("GSE107727_RAW/GSM2877130_SIGAF1_counts.txt.gz", sep = "\t")
+cm_SIGAG1 <- read.table("GSE107727_RAW/GSM2877131_SIGAG1_counts.txt.gz", sep = "\t")
+cm_SIGAH1 <- read.table("GSE107727_RAW/GSM2877132_SIGAH1_counts.txt.gz", sep = "\t")
+
+
+# checking everything is correctly in there?
+gplots::venn(list(
+  rownames(cm_SIGAB1),
+  rownames(cm_SIGAC1),
+  rownames(cm_SIGAD1)
+)
+)
+gplots::venn(list(
+  rownames(cm_SIGAF1),
+  rownames(cm_SIGAG1),
+  rownames(cm_SIGAH1)
+)
+)
+
+gplots::venn(list(
+  colnames(cm_SIGAB1),
+  colnames(cm_SIGAC1),
+  colnames(cm_SIGAD1)
+)
+
+# make the colnames unique, just to be safer:
+colnames(cm_SIGAB1) <- paste0("SIGAB1-",colnames(cm_SIGAB1))
+colnames(cm_SIGAC1) <- paste0("SIGAC1-",colnames(cm_SIGAC1))
+colnames(cm_SIGAD1) <- paste0("SIGAD1-",colnames(cm_SIGAD1))
+colnames(cm_SIGAF1) <- paste0("SIGAF1-",colnames(cm_SIGAF1))
+colnames(cm_SIGAG1) <- paste0("SIGAG1-",colnames(cm_SIGAG1))
+colnames(cm_SIGAH1) <- paste0("SIGAH1-",colnames(cm_SIGAH1))
+
+# fulllist <- list(cm_SIGAB1[1:3,1:10],cm_SIGAC1[1:3,1:10],cm_SIGAD1[1:3,1:10],cm_SIGAF1[1:3,1:10],cm_SIGAG1[1:3,1:10],cm_SIGAH1[1:3,1:10])
+
+fullmat <- do.call(cbind,
+                   list(cm_SIGAB1,cm_SIGAC1,cm_SIGAD1,
+                        cm_SIGAF1,cm_SIGAG1,cm_SIGAH1))
+pryr::object_size(fullmat)
+fullmat <- as.matrix(fullmat)
+pryr::object_size(fullmat)
+```
+
+### To keep the memory footprint small...
+
+```{r}
+library(SingleCellExperiment)
+
+fullmat <- as(fullmat, "dgCMatrix")
+pryr::object_size(fullmat)
+
+head(fullmat)
+sce <- SingleCellExperiment(assays = list(counts = fullmat))
+
+pryr::object_size(sce)
+
+sce_blood <- sce
+saveRDS(sce_blood,"sce_blood.RDS")
+```
+
+### Proceeding with the further processing...
+
+```{r}
+sce <- readRDS("sce_blood.RDS")
+library("DropletUtils")
+set.seed(100)
+e.out <- emptyDrops(counts(sce))
+e.keep <- e.out$FDR <= 0.01
+summary(e.keep)
+
+sce$Detection <- e.keep
+sce$PValue <- e.out$PValue
+# sce <- sce[,keep]
+```
+
+### Adding gene-level annotation
+
+```{r}
+library(AnnotationHub)
+## Load the annotation resource.
+ah <- AnnotationHub()
+
+## Query for all available EnsDb databases
+query(ah, c("92", "EnsDb","Homo"))
+query(ah, c("92", "EnsDb","Musculus"))
+
+edb_v92_human <- ah[["AH60977"]]
+edb_v92_mouse <- ah[["AH60992"]]
+
+symb <- mapIds(edb_v92_mouse, keys=rownames(sce), keytype="GENEID", column="SYMBOL")
+rowData(sce)$ENSEMBL <- rownames(sce)
+rowData(sce)$SYMBOL <- symb
+head(rowData(sce))
+
+library(scater)
+rownames(sce) <- uniquifyFeatureNames(rowData(sce)$ENSEMBL, rowData(sce)$SYMBOL)
+head(rownames(sce))
+
+# We also determine the chromosomal location for each gene.
+
+location <- mapIds(edb_v92_mouse, keys=rowData(sce)$ENSEMBL,
+                   column="SEQNAME", keytype="GENEID")
+rowData(sce)$CHR <- location
+## e.g. ...
+summary(location=="MT")
+```
+
+
