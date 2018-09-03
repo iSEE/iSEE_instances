@@ -1,11 +1,89 @@
 # Code for generating an instance of iSEE for the data from Dahlin et al, 2018
 
-http://www.bloodjournal.org/content/131/21/e1.long?sso-checked=true
+Paper: http://www.bloodjournal.org/content/131/21/e1.long?sso-checked=true
+
+Data: The data reported in this article have been deposited in the Gene Expression Omnibus database (accession numbers GSE106973 and GSE107727).
+
+
+## GSE106973
+
+https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106973
+-> https://www.ncbi.nlm.nih.gov/sra?term=SRP125087
+
+Single cell RNA-sequencing of 94 basophil/mast cell progenitors (BMCPs) and 47 granulocyte/monocyte progenitors (GMPs) isolated from bone marrow of three female C57BL/6 mice.
 
 ```{r}
-
-
-
-
+setwd("iSEE_dahlin_blood")
 ```
+
+
+```{r eval=FALSE}
+download.file("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE106973&format=file&file=GSE106973%5FHTSeq%5Fcounts%2Etxt%2Egz",
+              destfile = "scrnaseq_counts_GSE106973.txt.gz")
+```
+
+```{r}
+sccm <- read.table("scrnaseq_counts_GSE106973.txt.gz",sep = "\t",header = TRUE)
+rownames(sccm) <- sccm$ID
+dim(sccm)
+
+head(sccm)
+sccm <- sccm[,-1]
+head(sccm)
+
+# remove last lines
+tail(sccm)
+sccm <- sccm[-grep("__",rownames(sccm)),]
+tail(sccm)
+# there are spike ins!
+```
+
+
+The default set:
+
+```{r}
+library(scRNAseq)
+data(allen)
+class(allen)
+library(scater)
+sce <- as(allen, "SingleCellExperiment")
+counts(sce) <- assay(sce, "tophat_counts")
+sce <- normalize(sce)
+sce <- runPCA(sce)
+sce <- runTSNE(sce)
+rowData(sce)$ave_count <- rowMeans(counts(sce))
+rowData(sce)$n_cells <- rowSums(counts(sce)>0)
+sce
+# launch the app itself ----
+library(iSEE)
+iSEE(sce)
+```
+
+This one set:
+
+```{r}
+se <- SummarizedExperiment(assays = SimpleList(counts = as.matrix(sccm)))
+colData(se) <- DataFrame(
+  id = colnames(sccm)
+)
+dim(se)
+
+colnames(se) <- colnames(sccm)
+se$celltype <- unlist(lapply(
+  strsplit(se$id,split = "_"),
+  function(arg) arg[[1]]))
+
+sce <- as(se, "SingleCellExperiment")
+sce <- normalize(sce)
+sce <- runPCA(sce)
+sce <- runTSNE(sce)
+rowData(sce)$ave_count <- rowMeans(counts(sce))
+rowData(sce)$n_cells <- rowSums(counts(sce)>0)
+sce
+# launch the app itself ----
+library(iSEE)
+iSEE(sce)
+```
+
+
 
