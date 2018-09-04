@@ -322,4 +322,83 @@ head(top.dec)
 plotExpression(sce, features = rownames(top.dec)[1:10])
 ```
 
+### Dimensionality reduction
+
+We use the `denoisePCA` function to perform PCA, using the assumed Poisson technical trend.
+
+```{r}
+
+sce <- denoisePCA(sce, technical=new.trend, approx=TRUE)
+ncol(reducedDim(sce, "PCA"))
+plot(attr(reducedDim(sce), "percentVar"))
+abline(v=ncol(reducedDim(sce, "PCA")), lty=2, col="red")
+# We can plot the first few components.
+
+plotPCA(sce, ncomponents=3, colour_by="log10_total_features_by_counts")
+```
+
+Same with using _t_-SNE for visualization.
+
+```{r}
+sce <- runTSNE(sce, use_dimred="PCA", perplexity=30, rand_seed=100)
+plotTSNE(sce, colour_by="log10_total_features_by_counts")
+```
+
+```
+# ## alternative:
+# library(edgeR)
+# assay(sce, "log2CPM") <- cpm(assay(sce, "counts"), log = TRUE, prior.count = 0.25)
+#
+# # Dimensionality reduction
+#
+# set.seed(12321)
+# sce <- runPCA(sce, exprs_values = "log2CPM")
+# irlba_out <- irlba(assay(sce, "log2CPM"))
+# tsne_out <- Rtsne(irlba_out$v, pca = FALSE, perplexity = 50, verbose = TRUE)
+# reducedDim(sce, "TSNE") <- tsne_out$Y
+```
+
+
+
+### Clustering with graph-based methods
+
+We use the shared nearest neighbour method for clustering.
+
+```{r}
+snn.gr <- buildSNNGraph(sce, use.dimred="PCA")
+clusters <- igraph::cluster_walktrap(snn.gr)
+sce$Cluster <- factor(clusters$membership)
+table(sce$Cluster)
+```
+
+Plotting them out to verify separateness.
+
+```{r}
+plotTSNE(sce, colour_by="Cluster")
+```
+
+Also examining their modularity scores.
+We look at the ratio of the observed and expected edge weights, as the raw modularity varies by orders of magnitudes across clusters.
+
+```{r}
+cluster.mod <- clusterModularity(snn.gr, sce$Cluster, get.values=TRUE)
+log.ratio <- log2(cluster.mod$observed/cluster.mod$expected + 1)
+library(pheatmap)
+pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE,
+         color=colorRampPalette(c("white", "blue"))(100))
+```
+
+## Marker gene detection
+
+Detecting marker genes for each cluster.
+```{r}
+marker.out <- findMarkers(sce, clusters=sce$Cluster)
+```
+
+Having a look at how the clusters interact with the detection status, so we can focus on EmptyDrops-unique clusters.
+
+```{r}
+table(sce$Cluster, sce$Detection)
+```
+
 
