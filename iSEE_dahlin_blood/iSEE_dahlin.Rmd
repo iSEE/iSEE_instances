@@ -407,4 +407,41 @@ Having a look at how the clusters interact with the detection status, so we can 
 table(sce$Cluster, sce$Detection)
 ```
 
+Focusing on cluster 14, which seems to be made of platelets:
+
+```{r heatmap8, fig.wide=TRUE}
+current <- marker.out[["14"]]
+chosen <- rownames(current)[current$Top <= 10]
+plotHeatmap(sce, features=chosen, exprs_values="logcounts",
+zlim=5, center=TRUE, symmetric=TRUE, cluster_cols=FALSE,
+colour_columns_by="Cluster", columns=order(sce$Cluster))
+```
+
+... and 5, which seems to contain damaged cells with high mitochondrial content:
+
+```{r heatmap6, fig.wide=TRUE}
+current <- marker.out[["1"]]
+chosen <- rownames(current)[current$Top <= 10]
+plotHeatmap(sce, features=chosen, exprs_values="logcounts",
+zlim=5, center=TRUE, symmetric=TRUE, cluster_cols=FALSE,
+colour_columns_by="Cluster", columns=order(sce$Cluster))
+```
+
+### Wrapping up
+
+We save the various bits and pieces for further plotting.
+
+```{r}
+saveRDS(sce, file="sce.rds")
+```
+
+
+## Session info
+
+Printing the session information
+
+```{r}
+sessionInfo()
+```
+
 
