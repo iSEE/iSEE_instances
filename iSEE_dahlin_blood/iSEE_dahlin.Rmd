@@ -170,7 +170,7 @@ sce <- SingleCellExperiment(assays = list(counts = fullmat))
 pryr::object_size(sce)
 
 sce_blood <- sce
-saveRDS(sce_blood,"sce_blood.RDS")
+saveRDS(sce_blood,"sce_blood_sparse.RDS")
 ```
 
 ### Proceeding with the further processing...
@@ -179,7 +179,9 @@ Keeping in mind that some operations are quite memory-intensive...
 
 
 ```{r}
-sce <- readRDS("sce_blood.RDS")
+sce <- readRDS("sce_blood_sparse.RDS")
+sce_blood <- readRDS("sce_blood.RDS")
+rownames(sce) <- rownames(sce_blood)
 library("DropletUtils")
 set.seed(100)
 e.out <- emptyDrops(counts(sce))
@@ -225,19 +227,20 @@ summary(location=="MT")
 
 ### Quality control on the cells
 
+Cell detection can be considered an implicit quality control step, so technically, no extra steps are needed.
+Nonetheless, we examine some commonly used metrics.
+
 ```{r}
-
-# Cell detection can be considered an implicit quality control step, so technically, no extra steps are needed.
-# Nonetheless, we examine some commonly used metrics.
-
 sce <- calculateQCMetrics(sce, feature_controls=list(Mito=which(location=="MT")))
 # par(mfrow=c(1,3))
 hist(log10(sce$total_counts), breaks=20, col="grey80")
 hist(log10(sce$total_features_by_counts), breaks=20, col="grey80")
 hist(sce$pct_counts_Mito, breaks=20, col="grey80")
+```
 
-# Interestingly, a large number of the features with low total counts also have high mitochondrial proportions.
+Interestingly, a large number of the features with low total counts also have high mitochondrial proportions.
 
+```{r}
 plot(sce$total_features_by_counts, sce$pct_counts_Mito)
 plot(sce$total_counts, sce$pct_counts_Mito)
 
@@ -256,6 +259,9 @@ hist(log10(ave), col="grey80")
 # This contains ribosomal protein genes and other usual suspects.
 
 plotHighestExprs(sce,10)
+
+saveRDS(sce,"sce_blood_sparse_QCed.RDS")
+
 ```
 
 ### Normalizing for cell-specific biases
