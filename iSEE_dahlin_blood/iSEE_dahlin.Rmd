@@ -175,6 +175,9 @@ saveRDS(sce_blood,"sce_blood.RDS")
 
 ### Proceeding with the further processing...
 
+Keeping in mind that some operations are quite memory-intensive...
+
+
 ```{r}
 sce <- readRDS("sce_blood.RDS")
 library("DropletUtils")
@@ -252,8 +255,71 @@ hist(log10(ave), col="grey80")
 # We also examine the top-most expressed genes.
 # This contains ribosomal protein genes and other usual suspects.
 
-plotHighestExprs(sce)
+plotHighestExprs(sce,10)
 ```
 
 ### Normalizing for cell-specific biases
+
+```{r}
+# We perform some pre-clustering to break up obvious clusters.
+
+library(scran)
+clusters <- quickCluster(sce, method="igraph", subset.row=ave>=0.1,
+                         irlba.args=list(maxit=1000)) # for convergence.
+table(clusters)
+
+# We then use the deconvolution method to compute size factors for each cell.
+
+sce <- computeSumFactors(sce, min.mean=0.1, cluster=clusters)
+summary(sizeFactors(sce))
+
+# We can plot these against the library sizes to see how much of a difference it makes.
+
+plot(sce$total_counts, sizeFactors(sce), log="xy")
+
+# Note that some size factors are very small and negative.
+# This represents cells that have so few expressed features that it is not possible to obtain a sensible size factor.
+
+neg.sf <- sizeFactors(sce)<0
+summary(neg.sf)
+
+# Instead, we replace the size factor with the (scaled) library size.
+
+library(Matrix)
+lib.sizes <- colSums(counts(sce))
+scaled.lib.sizes <- lib.sizes/mean(lib.sizes)
+sizeFactors(sce)[neg.sf] <- scaled.lib.sizes[neg.sf]
+
+# Finally, we compute normalized log-expresion values.
+
+sce <- normalize(sce)
+
+saveRDS(sce,"sce_blood_normalized.RDS")
+```
+
+### Modelling the mean-variance trend
+
+```{r}
+# We assume that the technical noise is Poisson and create a fitted trend on that basis.
+
+new.trend <- makeTechTrend(x=sce)
+
+# We actually estimate the variances and plot the trend against the original variances as well.
+
+fit <- trendVar(sce, use.spikes=FALSE, loess.args=list(span=0.05))
+plot(fit$mean, fit$var, pch=16)
+curve(fit$trend(x), col="dodgerblue", add=TRUE)
+curve(new.trend(x), col="red", add=TRUE)
+
+# We decompose the variance and have a look at the genes with the highest residual.
+
+dec <- decomposeVar(fit=fit)
+top.dec <- dec[order(dec$bio, decreasing=TRUE),]
+head(top.dec)
+
+# We can plot the genes with the largest biological components, to verify that they are indeed highly variable.
+
+plotExpression(sce, features = rownames(top.dec)[1:10])
+```
+
 
