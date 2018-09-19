@@ -133,10 +133,30 @@ saveRDS(tm_smartseq,"sce_tabulamuris_processed.RDS")
 
 ```
 
+Clustering with graph-based methods 
 
+```{r}
+# We use the shared nearest neighbour method for clustering.
+snn.gr <- buildSNNGraph(sce, use.dimred="PCA")
+clusters <- igraph::cluster_walktrap(snn.gr)
+sce$Cluster <- factor(clusters$membership)
+table(sce$Cluster)
 
+# Plotting them out to verify separateness.
+plotTSNE(sce, colour_by="Cluster")
 
+# Also examining their modularity scores.
+# We look at the ratio of the observed and expected edge weights, as the raw modularity varies by orders of magnitudes across clusters.
+cluster.mod <- clusterModularity(snn.gr, sce$Cluster, get.values=TRUE)
+log.ratio <- log2(cluster.mod$observed/cluster.mod$expected + 1)
+library(pheatmap)
+pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE,
+         color=colorRampPalette(c("white", "blue"))(100))
 
+# Marker gene detection
+# Detecting marker genes for each cluster.
+marker.out <- findMarkers(sce, clusters=sce$Cluster)
+```
 
 
 
@@ -154,3 +174,13 @@ saveRDS(tm_smartseq,"sce_tabulamuris_processed.RDS")
 ```{r}
 sessionInfo()
 ```
+
+
+
+
+
+
+
+
+
+
