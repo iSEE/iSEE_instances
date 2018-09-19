@@ -4,7 +4,7 @@ Paper: https://www.biorxiv.org/content/early/2018/03/29/237446
 
 Data: The data reported in this article have been made available on GEO (accession code: [GSE109774](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE109774)), as well as from http://tabula-muris.ds.czbiohub.org, following the link on Figshare.
 
-An even cleverer and more straightforward way to access and explore the data is to use the TabulaMurisData Bioconductor package, https://github.com/csoneson/TabulaMurisData.
+An even cleverer and more straightforward way to access and explore the data is to use the TabulaMurisData Bioconductor package, http://bioconductor.org/packages/TabulaMurisData/.
 
 ## Getting the TabulaMurisData package
 
@@ -137,17 +137,17 @@ Clustering with graph-based methods
 
 ```{r}
 # We use the shared nearest neighbour method for clustering.
-snn.gr <- buildSNNGraph(sce, use.dimred="PCA")
+snn.gr <- buildSNNGraph(tm_smartseq, use.dimred="PCA")
 clusters <- igraph::cluster_walktrap(snn.gr)
-sce$Cluster <- factor(clusters$membership)
-table(sce$Cluster)
+tm_smartseq$Cluster <- factor(clusters$membership)
+table(tm_smartseq$Cluster)
 
 # Plotting them out to verify separateness.
-plotTSNE(sce, colour_by="Cluster")
+plotTSNE(tm_smartseq, colour_by="Cluster")
 
 # Also examining their modularity scores.
 # We look at the ratio of the observed and expected edge weights, as the raw modularity varies by orders of magnitudes across clusters.
-cluster.mod <- clusterModularity(snn.gr, sce$Cluster, get.values=TRUE)
+cluster.mod <- clusterModularity(snn.gr, tm_smartseq$Cluster, get.values=TRUE)
 log.ratio <- log2(cluster.mod$observed/cluster.mod$expected + 1)
 library(pheatmap)
 pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE,
@@ -155,7 +155,7 @@ pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE,
 
 # Marker gene detection
 # Detecting marker genes for each cluster.
-marker.out <- findMarkers(sce, clusters=sce$Cluster)
+marker.out <- findMarkers(tm_smartseq, clusters=tm_smartseq$Cluster)
 ```
 
 
@@ -174,13 +174,5 @@ marker.out <- findMarkers(sce, clusters=sce$Cluster)
 ```{r}
 sessionInfo()
 ```
-
-
-
-
-
-
-
-
 
 
