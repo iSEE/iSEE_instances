@@ -47,6 +47,93 @@ pryr::object_size(tm_smartseq)
 rownames(tm_smartseq) # no need to add gene symbols, but we can try with ENSEMBL ids
 ```
 
+Adding gene level annotation
+
+```{r}
+ah <- AnnotationHub()
+query(ah, c("92", "EnsDb","Mus Musculus"))
+edb_v92_mouse <- ah[["AH60992"]]
+rowData(tm_smartseq)
+ens_ids <- mapIds(edb_v92_mouse, keys=rownames(tm_smartseq), keytype="SYMBOL", column="GENEID")
+# rowData(tm_smartseq)$SYMBOL <- rownames(tm_smartseq)
+rowData(tm_smartseq)$ENSEMBL <- ens_ids
+
+# We also determine the chromosomal location for each gene.
+location <- mapIds(edb_v92_mouse, keys=rowData(tm_smartseq)$Symbol,
+                   column="SEQNAME", keytype="SYMBOL")
+rowData(tm_smartseq)$CHR <- location
+## e.g. ...
+summary(location=="MT")
+
+head(rowData(tm_smartseq))
+```
+
+Quality control on the cells
+
+```{r}
+tm_smartseq <- scatercalculateQCMetrics(tm_smartseq)
+hist(log10(tm_smartseq$total_counts), breaks=20, col="grey80")
+hist(log10(tm_smartseq$total_features_by_counts), breaks=20, col="grey80")
+
+ave <- calcAverage(tm_smartseq)
+rowData(tm_smartseq)$AveCount <- ave
+hist(log10(ave), col="grey80")
+
+# We also examine the top-most expressed genes.
+# This contains ribosomal protein genes and other usual suspects.
+
+plotHighestExprs(tm_smartseq,10)
+```
+
+Normalizing for cell-specific biases
+
+```{r}
+# We perform some pre-clustering to break up obvious clusters.
+clusters <- quickCluster(tm_smartseq, method="igraph", subset.row=ave>=0.1,
+                         irlba.args=list(maxit=1000)) # for convergence.
+table(clusters)
+
+# We then use the deconvolution method to compute size factors for each cell.
+tm_smartseq <- computeSumFactors(tm_smartseq, min.mean=0.1, cluster=clusters)
+summary(sizeFactors(tm_smartseq))
+# We can plot these against the library sizes to see how much of a difference it makes.
+plot(tm_smartseq$total_counts, sizeFactors(tm_smartseq), log="xy")
+# Note that some size factors are very small and negative.
+# This represents cells that have so few expressed features that it is not possible to obtain a sensible size factor.
+neg.sf <- sizeFactors(tm_smartseq)<0
+summary(neg.sf)
+# Instead, we replace the size factor with the (scaled) library size.
+library(Matrix)
+lib.sizes <- colSums(counts(tm_smartseq))
+scaled.lib.sizes <- lib.sizes/mean(lib.sizes)
+sizeFactors(tm_smartseq)[neg.sf] <- scaled.lib.sizes[neg.sf]
+# Finally, we compute normalized log-expresion values.
+tm_smartseq <- normalize(tm_smartseq)
+saveRDS(tm_smartseq,"sce_tabulamuris_norm.RDS")
+
+```
+
+
+
+The compact version - probably not as clean as the full one
+
+```{r}
+tm_smartseq <- computeSumFactors(tm_smartseq) 
+tm_smartseq <- normalize(tm_smartseq)
+tm_smartseq <- runPCA(tm_smartseq)
+tm_smartseq <- runTSNE(tm_smartseq)
+
+#> tm_smartseq <- scran::computeSumFactors(tm_smartseq)
+# Error in nlsModel(formula, mf, start, wts) : 
+  # singular gradient matrix at initial parameter estimates
+# In addition: There were 12 warnings (use warnings() to see them)
+
+saveRDS(tm_smartseq,"sce_tabulamuris_processed.RDS")
+
+```
+
+
+
 
 
 
