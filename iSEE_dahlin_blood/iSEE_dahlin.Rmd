@@ -296,7 +296,9 @@ lib.sizes <- colSums(counts(sce))
 scaled.lib.sizes <- lib.sizes/mean(lib.sizes)
 sizeFactors(sce)[neg.sf] <- scaled.lib.sizes[neg.sf]
 
-# Finally, we compute normalized log-expresion values.
+# Finally, we compute normalized log-expression values.
+
+saveRDS(sce,"sce_blood_sparse_QCed_prenorm.RDS")
 
 sce <- normalize(sce)
 
@@ -305,26 +307,34 @@ saveRDS(sce,"sce_blood_normalized.RDS")
 
 ### Modelling the mean-variance trend
 
+We assume that the technical noise is Poisson and create a fitted trend on that basis.
+
 ```{r}
-# We assume that the technical noise is Poisson and create a fitted trend on that basis.
 
 new.trend <- makeTechTrend(x=sce)
 
-# We actually estimate the variances and plot the trend against the original variances as well.
+```
 
+We actually estimate the variances and plot the trend against the original variances as well.
+
+```{r}
 fit <- trendVar(sce, use.spikes=FALSE, loess.args=list(span=0.05))
 plot(fit$mean, fit$var, pch=16)
 curve(fit$trend(x), col="dodgerblue", add=TRUE)
 curve(new.trend(x), col="red", add=TRUE)
+```
 
-# We decompose the variance and have a look at the genes with the highest residual.
+We decompose the variance and have a look at the genes with the highest residual.
 
+```{r}
 dec <- decomposeVar(fit=fit)
 top.dec <- dec[order(dec$bio, decreasing=TRUE),]
 head(top.dec)
+```
 
-# We can plot the genes with the largest biological components, to verify that they are indeed highly variable.
+We can plot the genes with the largest biological components, to verify that they are indeed highly variable.
 
+```{r}
 plotExpression(sce, features = rownames(top.dec)[1:10])
 ```
 
@@ -333,21 +343,29 @@ plotExpression(sce, features = rownames(top.dec)[1:10])
 We use the `denoisePCA` function to perform PCA, using the assumed Poisson technical trend.
 
 ```{r}
-
 sce <- denoisePCA(sce, technical=new.trend, approx=TRUE)
 ncol(reducedDim(sce, "PCA"))
 plot(attr(reducedDim(sce), "percentVar"))
 abline(v=ncol(reducedDim(sce, "PCA")), lty=2, col="red")
-# We can plot the first few components.
+```
 
+```{r}
+saveRDS(sce,"sce_blood_normalized_pca.RDS")
+```
+
+We can plot the first few components.
+
+```{r}
 plotPCA(sce, ncomponents=3, colour_by="log10_total_features_by_counts")
 ```
 
 Same with using _t_-SNE for visualization.
 
 ```{r}
-sce <- runTSNE(sce, use_dimred="PCA", perplexity=30, rand_seed=100)
+set.seed(42)
+sce <- runTSNE(sce, use_dimred="PCA", perplexity=30)
 plotTSNE(sce, colour_by="log10_total_features_by_counts")
+saveRDS(sce,"sce_blood_normalized_pca_tsne.RDS")
 ```
 
 ```
@@ -443,5 +461,12 @@ Printing the session information
 ```{r}
 sessionInfo()
 ```
+
+
+
+### Code post iSEE exploration
+
+This ~is~ will be just copy-pasted from a live session, to reproduce the session 1:1!
+
 
 
