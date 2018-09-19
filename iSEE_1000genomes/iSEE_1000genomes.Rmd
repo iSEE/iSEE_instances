@@ -101,12 +101,13 @@ initialPanels <- DataFrame(
 )
 ```
 
-Separately, we can preconfigure the web-application to immediately color the _Reduced dimension plot panel 1_ by the "population" sample metadata: 
+Separately, we can preconfigure the web-application to immediately color the _Reduced dimension plot panel 1_ by the "population" sample metadata, and increase the point size: 
 
 ```{r}
 redDimArgs <- redDimPlotDefaults(sce, 1)
 redDimArgs$ColorBy <- "Column data"
 redDimArgs$ColorByColData <- "population"
+redDimArgs$PointSize <- 3
 ```
 
 We can also initialize the _Column data plot 1_ to display the "gender" sample metadata on the X-axis, the "population" sample metadata on the Y-axis, and to receive the point selection of samples from the _Reduced dimension plot panel_:
@@ -132,13 +133,21 @@ redDimArgs$BrushData[[1]] <- list(
         y = NULL), direction = "xy", brushId = "redDimPlot1_Brush", outputId = "redDimPlot1")
 ```
 
+Lastly, we can add a bespoke tour of the data set to guide users through the various panels:
+
+```{r}
+tourSteps <- read.delim("tour_1000genomes.txt", sep=";", header=TRUE)
+```
+
+
 Finally, we can pass those arguments to preconfigure the app instance:
 
 ```{r}
 app <- iSEE(
   sce,
   redDimArgs=redDimArgs, colDataArgs=colDataArgs,
-  initialPanels=initialPanels, sampAssayMax=0)
+  initialPanels=initialPanels, sampAssayMax=0,
+  tour=tourSteps)
 ```
 
 ## Launch the application

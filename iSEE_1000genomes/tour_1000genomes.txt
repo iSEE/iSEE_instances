@@ -1,0 +1,5 @@
+element;intro
+#Welcome;Welcome to the iSEE tour of the 1000 Genome Project!<br/><br/>In this tour, we demonstrate how Single Nucleotide Polymorphism (SNP) data may be visualized the Interactive SummarizedExperiment Explorer.<br/><br/><strong>Action:</strong> now, click on the 'Next' button or use the right arrow of your keyboard to proceed into your tour.
+#redDimPlot1;In this instance, we have colored samples in this <i>Reduced dimension plot</i> panel by the "population" metadata. This coloring scheme highlights how the principal components analysis identified the overall population structure in the data set.<br/><br/>In addition, we have preselected a subset of samples from african ancestry.
+#colDataPlot1;This <i>Column data plot</i> panel receives the point selection from the <i>Reduced dimension plot</i> panel.<br/><br/>This indicates that the principal component analysis also captured a certain amount of variability between samples of different genders. This would require particular consideration and care in downstream analyses!
+#Goodbye;To be continued!
