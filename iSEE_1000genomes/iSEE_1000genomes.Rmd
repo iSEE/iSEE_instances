@@ -125,6 +125,7 @@ colDataArgs <- colDataPlotDefaults(sce, 1)
 colDataArgs$XAxis <- "Column data"
 colDataArgs$XAxisColData <- "gender"
 colDataArgs$SelectByPlot <- "Reduced dimension plot 1"
+colDataArgs$PointSize <- 3
 ```
 
 To make the most of the point selection link that we just created, 
@@ -146,7 +147,6 @@ Lastly, we can add a bespoke tour of the data set to guide users through the var
 ```{r}
 tourSteps <- read.delim("tour_1000genomes.txt", sep=";", header=TRUE)
 ```
-
 
 Finally, we can pass those arguments to preconfigure the app instance:
 
