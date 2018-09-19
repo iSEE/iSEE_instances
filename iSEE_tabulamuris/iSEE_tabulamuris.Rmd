@@ -121,7 +121,8 @@ The compact version - probably not as clean as the full one
 tm_smartseq <- computeSumFactors(tm_smartseq) 
 tm_smartseq <- normalize(tm_smartseq)
 tm_smartseq <- runPCA(tm_smartseq)
-tm_smartseq <- runTSNE(tm_smartseq)
+set.seed(42)
+tm_smartseq <- runTSNE(tm_smartseq, use_dimred="PCA", perplexity=30)
 
 #> tm_smartseq <- scran::computeSumFactors(tm_smartseq)
 # Error in nlsModel(formula, mf, start, wts) : 
