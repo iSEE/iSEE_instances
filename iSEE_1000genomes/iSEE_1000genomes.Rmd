@@ -76,6 +76,7 @@ We can combine the genotype matrix and sample metadata using the `SummarizedExpe
 Conveniently, the `SingleCellExperiment` class` offers an additional slot to store dimensionality reduction results.
 
 ```{r}
+library(SingleCellExperiment)
 sce <- SingleCellExperiment(
     assays=list(genotype=genotype[idx, ]),
     colData=DataFrame(
@@ -85,6 +86,12 @@ sce <- SingleCellExperiment(
     reducedDims=list(PCA=pcs))
 ```
 
+The preprocessed `SingleCellExperiment` object can be saved to disk for later reuse:
+
+```{r}
+saveRDS(sce, "sce.rds")
+```
+
 # Visualize the data set with iSEE
 
 ## Configure and initialize an iSEE instance
@@ -92,6 +99,7 @@ sce <- SingleCellExperiment(
 The type, order, width and height of panels visible on startup can be defined:
 
 ```{r}
+library(iSEE)
 initialPanels <- DataFrame(
     Name=c(
       "Reduced dimension plot 1", "Column data plot 1", "Feature assay plot 1",
