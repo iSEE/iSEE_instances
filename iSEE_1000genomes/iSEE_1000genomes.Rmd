@@ -1,0 +1,152 @@
+
+# Code for generating an instance of iSEE for SNP data from the 1000 Genomes Project
+
+Paper: ?
+
+Data: The data reported in this article have been deposited in the Bioconductor _ExperimentHub_ (accession number EH550).
+
+## EH550
+
+This data set includes "DNA-seq data from the 1000 Genomes Project containing 22 AFR, 22 EAS, 21 EUR and 22 SAS samples. there are eight known related pairs including four parent-offspring pairs, two full-sibling pairs and two half-sibling or avuncular pairs in this dataset, which is saved as a Genomic Data Structure (GDS) file".
+
+### Downloading a local copy of the data set
+
+Firstly, we use the `ExperimentHub` package to download and cache the data set locally.
+
+The very first time, this code chunk will require a certain amount of time to download the data set.
+However, every subsequent evaluation of the code chunk will instantly fetch the locally cached copy of the data set.
+
+```{r}
+library(ExperimentHub)
+ehub <- ExperimentHub()
+EH550 <- ehub[["EH550"]]
+```
+
+### Importing the data set
+
+Genomic Data Structure (GDS) files are hierarchically structured to store multiple scalable array-oriented data sets with metadata information.
+
+```{r}
+EH550
+```
+
+Individual pieces of informations (e.g., genotype matrices, metadata fields) can be extracted as follows:
+
+```{r}
+(node <- index.gdsn(EH550, "genotype"))
+genotype <- read.gdsn(node)
+
+(node <- index.gdsn(EH550, "sample.annot/population"))
+population <- read.gdsn(node)
+
+(node <- index.gdsn(EH550, "sample.annot/gender"))
+gender <- read.gdsn(node)
+```
+
+Once the relevant data was extracted, it is good practice to close the connection to the file, as follows:
+
+```{r}
+closefn.gds(EH550)
+```
+
+## Preparing a SummarizedExperiment object
+
+To rapidly demonstrate this data set, we can select a random of set of 1 million SNPs, as follows:
+
+```{r}
+set.seed(1234)
+idx <- sample.int(nrow(genotype), 1E6)
+```
+
+### Dimensionality reduction
+
+We can rapidly compute principal components in the subset of SNPs using the `snpStats` package:
+
+```{r}
+library(snpStats)
+snps.class <- new("SnpMatrix", t(genotype[idx, ]))
+xxmat <- xxt(snps.class, correct.for.missing=FALSE)
+evv <- eigen(xxmat, symmetric=TRUE)
+pcs <- evv$vectors[,1:5]
+```
+
+### Assembling the SingleCellExperiment object
+
+We can combine the genotype matrix and sample metadata using the `SummarizedExperiment` class.
+Conveniently, the `SingleCellExperiment` class` offers an additional slot to store dimensionality reduction results.
+
+```{r}
+sce <- SingleCellExperiment(
+    assays=list(genotype=genotype[idx, ]),
+    colData=DataFrame(
+        population=population,
+        gender=gender
+    ),
+    reducedDims=list(PCA=pcs))
+```
+
+# Visualize the data set with iSEE
+
+## Configure and initialize an iSEE instance
+
+The type, order, width and height of panels visible on startup can be defined:
+
+```{r}
+initialPanels <- DataFrame(
+    Name=c(
+      "Reduced dimension plot 1", "Column data plot 1", "Feature assay plot 1",
+      "Row statistics table 1", "Column statistics table 1", "Heat map 1"),
+    Width=c(4L, 4L, 4L, 4L, 4L, 4L),
+    Height=c(500L, 500L, 500L, 500L, 500L, 500L)
+)
+```
+
+Separately, we can preconfigure the web-application to immediately color the _Reduced dimension plot panel 1_ by the "population" sample metadata: 
+
+```{r}
+redDimArgs <- redDimPlotDefaults(sce, 1)
+redDimArgs$ColorBy <- "Column data"
+redDimArgs$ColorByColData <- "population"
+```
+
+We can also initialize the _Column data plot 1_ to display the "gender" sample metadata on the X-axis, the "population" sample metadata on the Y-axis, and to receive the point selection of samples from the _Reduced dimension plot panel_:
+
+```{r}
+colDataArgs <- colDataPlotDefaults(sce, 1)
+colDataArgs$XAxis <- "Column data"
+colDataArgs$XAxisColData <- "gender"
+colDataArgs$SelectByPlot <- "Reduced dimension plot 1"
+```
+
+To make the most of the point selection link that we just created, 
+
+We can then make the most of the point selection link that we just created to initialize a selection in the _Reduced dimension plot panel 1_, and thereby showcase a particular set of samples as soon as the app is launched:
+
+```{r}
+redDimArgs$BrushData[[1]] <- list(
+  xmin = 0.1, xmax = 0.2, ymin = -0.05, ymax = 0.0015,
+  mapping = list(x = "X", y = "Y", colour = "ColorBy"), 
+    domain = list(left = -0.0984518200630295, right = 0.257456891785684, bottom = -0.164615085558333, 
+        top = 0.193410414110012), range = list(left = 41.4973646190069, right = 345.520547945205, 
+        bottom = 426.852678724315, top = 23.7921069615253), log = list(x = NULL, 
+        y = NULL), direction = "xy", brushId = "redDimPlot1_Brush", outputId = "redDimPlot1")
+```
+
+Finally, we can pass those arguments to preconfigure the app instance:
+
+```{r}
+app <- iSEE(
+  sce,
+  redDimArgs=redDimArgs, colDataArgs=colDataArgs,
+  initialPanels=initialPanels, sampAssayMax=0)
+```
+
+## Launch the application
+
+The preconfigured application can then be launched interactively, or deployed to a web-server:
+
+```{r}
+library(shiny)
+runApp(app)
+```
+
