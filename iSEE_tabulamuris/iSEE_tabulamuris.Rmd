@@ -1,0 +1,68 @@
+# Code for generating an instance of iSEE for the data of the Tabula Muris project
+
+Paper: https://www.biorxiv.org/content/early/2018/03/29/237446
+
+Data: The data reported in this article have been made available on GEO (accession code: [GSE109774](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE109774)), as well as from http://tabula-muris.ds.czbiohub.org, following the link on Figshare.
+
+An even cleverer and more straightforward way to access and explore the data is to use the TabulaMurisData Bioconductor package, https://github.com/csoneson/TabulaMurisData.
+
+## Getting the TabulaMurisData package
+
+```{r}
+library(BiocManager)
+BiocManager::install("TabulaMurisData")
+library(TabulaMurisData)
+```
+
+
+```{r}
+library(ExperimentHub)
+eh <- ExperimentHub()
+query(eh, "TabulaMurisData")
+```
+
+```{r}
+tm_droplet <- TabulaMurisDroplet()
+tm_smartseq <- TabulaMurisSmartSeq2()
+```
+
+Now loading all packages one might need throughout this document
+
+```{r}
+library(AnnotationHub)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(iSEE)
+
+```
+
+
+### FACS-sorted SmartSeq data
+
+Keeping in mind that some operations are quite memory-intensive...
+
+```{r}
+pryr::object_size(tm_smartseq)
+rownames(tm_smartseq) # no need to add gene symbols, but we can try with ENSEMBL ids
+```
+
+
+
+
+
+
+
+
+
+### 10X droplet-based data
+
+```{r}
+
+```
+
+## Session info
+
+```{r}
+sessionInfo()
+```
