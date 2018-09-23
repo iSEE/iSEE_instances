@@ -1,5 +1,7 @@
-# iSEE_instances
+# Instances of iSEE web-applications
 
-This repository stores the commands to reproduce entire analyses for iSEE instances on public/own data.
+The [_iSEE_](https://github.com/csoneson/iSEE) package provides an interactive user interface for exploring data in objects derived from the `SummarizedExperiment` class.
 
-Each dataset/instance can be organised in a folder, with a README.md file and a Rmd document to reproduce the `SummarizedExperiment`/`SingleCellExperiment` objects, which will then ideally saved as .rds files once the workflow is complete.
+This repository stores the commands to reproduce entire analyses for _iSEE_ instances on public/own data.
+
+Each dataset/instance can be organised in a folder, with a `README.md` file and a R Markdown (.Rmd) document to reproduce the `SummarizedExperiment`/`SingleCellExperiment` objects, which will then ideally serialized and saved to file (.rds) once the workflow is complete.
