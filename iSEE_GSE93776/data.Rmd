@@ -1,0 +1,64 @@
+---
+title: "Import GSE93776"
+author: "Kevin Rue-Albrecht"
+date: "28/09/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+stopifnot(suppressPackageStartupMessages({
+    require(GEOquery)
+    require(SummarizedExperiment)
+    require(SingleCellExperiment)
+    require(HDF5Array)
+}))
+```
+
+## Import data from GEO
+
+Download size: 39.4 MB
+
+```{r}
+gse <- getGEO('GSE93776',GSEMatrix=TRUE)
+eset <- gse$GSE93776_series_matrix.txt.gz
+eset
+```
+
+View the sample metadata fields.
+
+```{r}
+varLabels(eset)
+```
+
+## Set factors
+
+```{r}
+eset$disease <- factor(eset$disease, c("healthy control", "rheumatoid arthritis"))
+eset$`cell type:ch1` <- factor(gsub("_", "\n", eset$`cell type:ch1`))
+```
+
+## Coerce to SingleCellExperiment
+
+```{r}
+se <- as(eset, "SummarizedExperiment")
+sce <- as(se, "SingleCellExperiment")
+```
+
+## Store the assay data as HDF5 matrices
+
+```{r}
+h5filename <- "GSE93776.h5"
+h5createFile(h5filename)
+h5createGroup (h5filename, "assays")
+assay(sce, "exprs") <- writeHDF5Array(assay(sce, "exprs"), h5filename, "assays/exprs", chunkdim = c(100, 20), verbose=TRUE)
+H5close()
+```
+
+## Save the resulting object
+
+```{r}
+saveRDS(sce, "GSE93776_sce.rds")
+```

@@ -1,0 +1,8 @@
+element;intro
+#Welcome;<p>Welcome to the interactive iSEE tour for <b>GSE93776 - Immune cells gene expression from rheumatoid arthritis and healthy donors</b>.</p><p>You will be showed around the different components of the interface and learn the basic usage mechanisms by doing - the highlighted elements will be responding to the user's actions, while the rest of the UI will be shaded.Please follow the instructions when prompted (<b>Action</b>) to ensure a smooth tour.</p><p><b>Action:</b> Now click on the 'Next' button or use the right arrow of your keyboard to proceed into your tour.</p>
+#featAssayPlot1;<p>The <i>Feature assay plot</i> panel displays the expression of a given feature (here, probeset) on the Y-axis.</p>
+#featAssayPlot1;<p>The X-axis can be set to display different sources of information using the <i>Data parameters</i> collapsible box located under the plot. This application was preconfigured to separate the different cell types across the X-axis, to illustrate markers of cell types.</p>
+#featAssayPlot1;<p>In addition, the application was also preconfigured to display the available disease status of each sample ("healthy control" or "rheumatoid arthritis"), to account for differential expression in health and disease.</p>
+#rowStatTable1;<p>This app was preconfigured so that the above <i>Feature assay plot</i> panel displays the probeset selected in this <i>Row statistic table</i> panel.</p>
+#rowStatTable1;<p>The key benefit is that this table may be rapidly filtered for selected gene symbols, immediately identifying the associated probeset identifier(s).</p><p><b>Action:</b> Click on any row and see the above <i>Feature assay plot</i> panel update to the selected probeset!</p>
+#Thanks;Thank you for taking the tour!
