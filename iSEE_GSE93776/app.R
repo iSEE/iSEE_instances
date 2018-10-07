@@ -65,7 +65,7 @@ ecm <- ExperimentColorMap(
 
 # Import the tour steps ----
 
-tour <- read.delim("iSEE_GSE93776/tour_steps.txt", sep=";", quote="")
+tour <- read.delim("tour_steps.txt", sep=";", quote="")
 
 # Build the app ----
 
