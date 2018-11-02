@@ -1,0 +1,129 @@
+# Code for generating an instance of iSEE for the Human Cell Atlas 
+
+The data can be retrieved from here: https://preview.data.humancellatlas.org
+
+```{r}
+download.file("https://s3.amazonaws.com/preview-ica-expression-data/ica_cord_blood_h5.h5","ica_cord_blood_h5.h5")
+download.file("https://s3.amazonaws.com/preview-ica-expression-data/ica_bone_marrow_h5.h5","ica_bone_marrow_h5.h5")
+
+download.file("https://preview.data.humancellatlas.org/datasets/census/hca-metadata-census.xlsx","hca-metadata-census.xlsx")
+```
+
+A probably even better way would be to use BiocFileCache?
+
+Information is provided in the README file (https://s3.amazonaws.com/preview-ica-expression-data/Brief+ICA+Read+Me.pdf)
+
+Some extra information might be extracted here: https://github.com/HumanCellAtlas/table-testing
+
+## Setup
+
+Here we are loading all packages one might need throughout this document
+
+```{r}
+library(AnnotationHub)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(iSEE)
+library(rhdf5)
+```
+
+## Getting the data in the usual matrix format
+
+```{r}
+hca_cord_blood_h5 <- H5Fopen("ica_cord_blood_h5.h5")
+hca_bone_marrow_h5 <- H5Fopen("ica_bone_marrow_h5.h5")
+
+hca_cord_blood_h5
+hca_bone_marrow_h5
+
+h5_cordblood <- hca_cord_blood_h5$GRCh38
+h5_bonemarrow <- hca_bone_marrow_h5$GRCh38
+
+pryr::object_size(h5_cordblood)
+pryr::object_size(h5_bonemarrow)
+
+```
+
+```{r}
+library(readxl)
+
+hca_metadata_sheetnames <- readxl:::xlsx_sheets("hca-metadata-census.xlsx")
+
+hca_metadata_list <- lapply(hca_metadata_sheetnames, function(arg) read_xlsx(path = "hca-metadata-census.xlsx",sheet = arg))
+names(hca_metadata_list) <- hca_metadata_sheetnames
+```
+
+
+## The SingleCellExperiment in the making
+
+```{r}
+
+```
+
+Annotating the object, adding gene level annotation
+
+
+## Detecting empty droplets
+
+```{r}
+
+```
+
+## Quality control on the cells
+
+```{r}
+
+```
+
+## Cell cycle classification?
+
+```{r}
+
+```
+
+## Examining gene level expression metrics
+
+```{r}
+
+```
+
+## Normalization of cell specific biases
+
+```{r}
+
+```
+
+## Modeling the technical noise in gene expression
+
+```{r}
+
+```
+
+## Dimensionality reduction
+
+```{r}
+
+```
+
+## Clustering cells into putative subpopulations
+
+```{r}
+
+```
+
+## Marker gene detection
+
+```{r}
+
+```
+
+
+
+## Session info
+
+```{r}
+sessionInfo()
+```
+
+
