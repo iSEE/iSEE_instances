@@ -1,3 +1,36 @@
+---
+title: "Code for generating an instance of iSEE for the data of the Tabula Muris project"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+**Compiled date**: `r Sys.Date()`
+
+**Last edited**: 2018-12-03
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  error = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+
+
 # Code for generating an instance of iSEE for the data of the Tabula Muris project
 
 Paper: https://www.biorxiv.org/content/early/2018/03/29/237446
@@ -128,9 +161,6 @@ tm_smartseq <- runTSNE(tm_smartseq, use_dimred="PCA", perplexity=30)
 # Error in nlsModel(formula, mf, start, wts) : 
   # singular gradient matrix at initial parameter estimates
 # In addition: There were 12 warnings (use warnings() to see them)
-
-saveRDS(tm_smartseq,"sce_tabulamuris_processed.RDS")
-
 ```
 
 Clustering with graph-based methods 
@@ -156,6 +186,8 @@ pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE,
 # Marker gene detection
 # Detecting marker genes for each cluster.
 marker.out <- findMarkers(tm_smartseq, clusters=tm_smartseq$Cluster)
+
+saveRDS(tm_smartseq,"sce_tabulamuris_processed_smartseq.RDS")
 ```
 
 
