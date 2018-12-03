@@ -1,3 +1,37 @@
+---
+title: "Code for generating an instance of iSEE for the data from Dahlin et al, 2018"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+**Compiled date**: `r Sys.Date()`
+
+**Last edited**: 2018-12-03
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  error = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+
+
+
 # Code for generating an instance of iSEE for the data from Dahlin et al, 2018
 
 Paper: http://www.bloodjournal.org/content/131/21/e1.long?sso-checked=true
@@ -467,6 +501,7 @@ sessionInfo()
 ### Code post iSEE exploration
 
 This ~is~ will be just copy-pasted from a live session, to reproduce the session 1:1!
+
 
 
 
