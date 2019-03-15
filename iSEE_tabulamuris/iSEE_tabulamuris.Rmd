@@ -39,7 +39,7 @@ Data: The data reported in this article have been made available on GEO (accessi
 
 An even cleverer and more straightforward way to access and explore the data is to use the TabulaMurisData Bioconductor package, http://bioconductor.org/packages/TabulaMurisData/.
 
-## Getting the TabulaMurisData package
+# Getting the TabulaMurisData package
 
 ```{r}
 library(BiocManager)
@@ -54,11 +54,6 @@ eh <- ExperimentHub()
 query(eh, "TabulaMurisData")
 ```
 
-```{r}
-tm_droplet <- TabulaMurisDroplet()
-tm_smartseq <- TabulaMurisSmartSeq2()
-```
-
 Now loading all packages one might need throughout this document
 
 ```{r}
@@ -67,11 +62,15 @@ library(SingleCellExperiment)
 library(scater)
 library(scran)
 library(iSEE)
-
 ```
 
 
-### FACS-sorted SmartSeq data
+# FACS-sorted SmartSeq data
+
+```{r}
+# tm_droplet <- TabulaMurisDroplet()
+tm_smartseq <- TabulaMurisSmartSeq2()
+```
 
 Keeping in mind that some operations are quite memory-intensive...
 
@@ -80,7 +79,7 @@ pryr::object_size(tm_smartseq)
 rownames(tm_smartseq) # no need to add gene symbols, but we can try with ENSEMBL ids
 ```
 
-Adding gene level annotation
+## Adding gene level annotation
 
 ```{r}
 ah <- AnnotationHub()
@@ -97,30 +96,153 @@ location <- mapIds(edb_v92_mouse, keys=rowData(tm_smartseq)$Symbol,
 rowData(tm_smartseq)$CHR <- location
 ## e.g. ...
 summary(location=="MT")
-
+# ok, no mitochondrial genes
 head(rowData(tm_smartseq))
 ```
 
-Quality control on the cells
+## Quality control on the cells
 
 ```{r}
-tm_smartseq <- scatercalculateQCMetrics(tm_smartseq)
+tm_smartseq <- scater::calculateQCMetrics(tm_smartseq)
 hist(log10(tm_smartseq$total_counts), breaks=20, col="grey80")
 hist(log10(tm_smartseq$total_features_by_counts), breaks=20, col="grey80")
 
-ave <- calcAverage(tm_smartseq)
-rowData(tm_smartseq)$AveCount <- ave
-hist(log10(ave), col="grey80")
+ave.counts <- calcAverage(tm_smartseq, use_size_factors=FALSE)
+rowData(tm_smartseq)$AveCount <- ave.counts
+hist(log10(ave.counts), col="grey80")
 
 # We also examine the top-most expressed genes.
 # This contains ribosomal protein genes and other usual suspects.
 
-plotHighestExprs(tm_smartseq,10)
+# plotHighestExprs(tm_smartseq,10)
+
+libsize.drop <- isOutlier(tm_smartseq$total_counts, nmads=3, type="lower", 
+    log=TRUE) # batch = ?
+feature.drop <- isOutlier(tm_smartseq$total_features_by_counts, nmads=3, type="lower", 
+    log=TRUE) 
+spike.drop <- isOutlier(tm_smartseq$pct_counts_ERCC, nmads=3, type="higher")
+
+keep <- !(libsize.drop | feature.drop | spike.drop)
+data.frame(ByLibSize=sum(libsize.drop), ByFeature=sum(feature.drop),
+    BySpike=sum(spike.drop), Remaining=sum(keep))
+
+dim(tm_smartseq)
+tm_smartseq$PassQC <- keep
+# saveRDS(tm_smartseq, file="...")
+tm_smartseq <- tm_smartseq[,keep]
+dim(tm_smartseq)
+
+num.cells <- nexprs(tm_smartseq, byrow=TRUE)
+smoothScatter(log10(ave.counts), num.cells, ylab="Number of cells", 
+    xlab=expression(Log[10]~"average count"))
+
+# keeping cells where at least one gene is expressed
+to.keep <- num.cells > 0
+tm_smartseq <- tm_smartseq[to.keep,]
+summary(to.keep)
 ```
 
-Normalizing for cell-specific biases
+## Normalizing for cell-specific biases
 
 ```{r}
+set.seed(42)
+
+# clusters <- quickCluster(tm_smartseq, min.mean=1, method="igraph",use.ranks = TRUE)
+# tm_smartseq <- computeSumFactors(tm_smartseq, cluster=clusters, min.mean=0.1)
+tm_smartseq <- computeSumFactors(tm_smartseq)
+
+summary(sizeFactors(tm_smartseq))
+plot(tm_smartseq$total_counts/1e6, sizeFactors(tm_smartseq), log="xy")
+
+# for the spike-ins
+tm_smartseq <- computeSpikeFactors(tm_smartseq, type="ERCC", general.use=FALSE)
+
+
+# backup plan
+tm_smartseq <- normalize(tm_smartseq)
+tm_smartseq <- scater::runPCA(tm_smartseq)
+tm_smartseq <- scater::runTSNE(tm_smartseq)
+
+saveRDS(tm_smartseq,"tm_smartseq.rds")
+
+```
+
+## Setting up the iSEE config
+
+```{r}
+options(iSEE.maxlevels = 85)
+
+tmu <- tm_smartseq
+
+rdd <- redDimPlotDefaults(tmu, 5)
+rdd$Downsample <- TRUE
+rdd$SampleRes <- 200
+rdd$PointSize <- 0.2
+rdd$Type <- 2
+rdd$ColorBy <- "Column data"
+rdd$ColorByColData <- "tissue"
+
+cdd <- colDataPlotDefaults(tmu, 5)
+cdd$Downsample <- TRUE
+cdd$SampleRes <- 200
+cdd$YAxis <- "tissue"
+cdd$XAxis <- "Column data"
+cdd$XAxisColData <- "mouse_id"
+cdd$PointSize <- 0.2
+
+fad <- featAssayPlotDefaults(tmu, 5)
+fad$Downsample <- TRUE
+fad$SampleRes <- 200
+fad$YAxisFeatName <- 2942
+fad$XAxis <- "Column data"
+fad$XAxisColData <- "tissue"
+fad$PointSize <- 0.2
+fad$ColorBy <- "Column data"
+fad$ColorByColData <- "tissue"
+
+rdp <- rowDataPlotDefaults(tmu, 5)
+rdp$Downsample <- TRUE
+rdp$SampleRes <- 200
+rdp$YAxis <- "pct_dropout_by_counts"
+rdp$XAxis <- "Row data"
+rdp$XAxisRowData <- "log10_mean_counts"
+
+sap <- sampAssayPlotDefaults(tmu, 5)
+sap$Downsample <- TRUE
+sap$SampleRes <- 200
+sap$XAxis <- "Sample name"
+sap$XAxisSampName <- "A1.B000127.3_38_F.1.1"
+
+
+initialPanels = DataFrame(
+    Name = c(sprintf("Reduced dimension plot %i", 1),
+             sprintf("Feature assay plot %i", 1),
+             sprintf("Sample assay plot %i", 1),
+             sprintf("Column data plot %i", 1),
+             sprintf("Row data plot %i", 1),
+             sprintf("Column statistics table %i", 1),
+             sprintf("Row statistics table %i", 1)),
+    Width = c(4, 4, 4, 3, 3, 3, 3))
+
+iSEE(tmu, 
+     redDimArgs = rdd,
+     colDataArgs = cdd, 
+     featAssayArgs = fad,
+     rowDataArgs = rdp,
+     sampAssayArgs = sap,
+     initialPanels = initialPanels)
+```
+
+
+
+
+
+
+
+
+
+
+```{r eval=FALSE}
 # We perform some pre-clustering to break up obvious clusters.
 clusters <- quickCluster(tm_smartseq, method="igraph", subset.row=ave>=0.1,
                          irlba.args=list(maxit=1000)) # for convergence.
@@ -157,15 +279,16 @@ tm_smartseq <- runPCA(tm_smartseq)
 set.seed(42)
 tm_smartseq <- runTSNE(tm_smartseq, use_dimred="PCA", perplexity=30)
 
+## still giving this error on MBP
 #> tm_smartseq <- scran::computeSumFactors(tm_smartseq)
 # Error in nlsModel(formula, mf, start, wts) : 
   # singular gradient matrix at initial parameter estimates
 # In addition: There were 12 warnings (use warnings() to see them)
 ```
 
-Clustering with graph-based methods 
+## Clustering with graph-based methods 
 
-```{r}
+```{r eval=FALSE}
 # We use the shared nearest neighbour method for clustering.
 snn.gr <- buildSNNGraph(tm_smartseq, use.dimred="PCA")
 clusters <- igraph::cluster_walktrap(snn.gr)
@@ -195,13 +318,11 @@ saveRDS(tm_smartseq,"sce_tabulamuris_processed_smartseq.RDS")
 
 
 
-### 10X droplet-based data
+# 10X droplet-based data
 
-```{r}
+See the other document.
 
-```
-
-## Session info
+# Session info {-}
 
 ```{r}
 sessionInfo()
