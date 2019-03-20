@@ -41,12 +41,20 @@ An even cleverer and more straightforward way to access and explore the data is 
 
 # Getting the TabulaMurisData package
 
+Install once:
+
 ```{r}
 library(BiocManager)
 BiocManager::install("TabulaMurisData")
+```
+
+Load the package
+
+```{r}
 library(TabulaMurisData)
 ```
 
+Alternatively...
 
 ```{r}
 library(ExperimentHub)
@@ -231,7 +239,8 @@ iSEE(tmu,
      featAssayArgs = fad,
      rowDataArgs = rdp,
      sampAssayArgs = sap,
-     initialPanels = initialPanels)
+     initialPanels = initialPanels,
+     appTitle = "iSEE v1.3.8 - Tabula Muris smartseq data")
 ```
 
 
@@ -339,76 +348,76 @@ iSEE(tmu,
 
 
 
-```{r eval=FALSE}
-# We perform some pre-clustering to break up obvious clusters.
-clusters <- quickCluster(tm_smartseq, method="igraph", subset.row=ave>=0.1,
-                         irlba.args=list(maxit=1000)) # for convergence.
-table(clusters)
+<!-- ```{r eval=FALSE} -->
+<!-- # We perform some pre-clustering to break up obvious clusters. -->
+<!-- clusters <- quickCluster(tm_smartseq, method="igraph", subset.row=ave>=0.1, -->
+<!--                          irlba.args=list(maxit=1000)) # for convergence. -->
+<!-- table(clusters) -->
 
-# We then use the deconvolution method to compute size factors for each cell.
-tm_smartseq <- computeSumFactors(tm_smartseq, min.mean=0.1, cluster=clusters)
-summary(sizeFactors(tm_smartseq))
-# We can plot these against the library sizes to see how much of a difference it makes.
-plot(tm_smartseq$total_counts, sizeFactors(tm_smartseq), log="xy")
-# Note that some size factors are very small and negative.
-# This represents cells that have so few expressed features that it is not possible to obtain a sensible size factor.
-neg.sf <- sizeFactors(tm_smartseq)<0
-summary(neg.sf)
-# Instead, we replace the size factor with the (scaled) library size.
-library(Matrix)
-lib.sizes <- colSums(counts(tm_smartseq))
-scaled.lib.sizes <- lib.sizes/mean(lib.sizes)
-sizeFactors(tm_smartseq)[neg.sf] <- scaled.lib.sizes[neg.sf]
-# Finally, we compute normalized log-expresion values.
-tm_smartseq <- normalize(tm_smartseq)
-saveRDS(tm_smartseq,"sce_tabulamuris_norm.RDS")
+<!-- # We then use the deconvolution method to compute size factors for each cell. -->
+<!-- tm_smartseq <- computeSumFactors(tm_smartseq, min.mean=0.1, cluster=clusters) -->
+<!-- summary(sizeFactors(tm_smartseq)) -->
+<!-- # We can plot these against the library sizes to see how much of a difference it makes. -->
+<!-- plot(tm_smartseq$total_counts, sizeFactors(tm_smartseq), log="xy") -->
+<!-- # Note that some size factors are very small and negative. -->
+<!-- # This represents cells that have so few expressed features that it is not possible to obtain a sensible size factor. -->
+<!-- neg.sf <- sizeFactors(tm_smartseq)<0 -->
+<!-- summary(neg.sf) -->
+<!-- # Instead, we replace the size factor with the (scaled) library size. -->
+<!-- library(Matrix) -->
+<!-- lib.sizes <- colSums(counts(tm_smartseq)) -->
+<!-- scaled.lib.sizes <- lib.sizes/mean(lib.sizes) -->
+<!-- sizeFactors(tm_smartseq)[neg.sf] <- scaled.lib.sizes[neg.sf] -->
+<!-- # Finally, we compute normalized log-expresion values. -->
+<!-- tm_smartseq <- normalize(tm_smartseq) -->
+<!-- saveRDS(tm_smartseq,"sce_tabulamuris_norm.RDS") -->
 
-```
+<!-- ``` -->
 
 
 
-The compact version - probably not as clean as the full one
+<!-- The compact version - probably not as clean as the full one -->
 
-```{r}
-tm_smartseq <- computeSumFactors(tm_smartseq) 
-tm_smartseq <- normalize(tm_smartseq)
-tm_smartseq <- runPCA(tm_smartseq)
-set.seed(42)
-tm_smartseq <- runTSNE(tm_smartseq, use_dimred="PCA", perplexity=30)
+<!-- ```{r} -->
+<!-- tm_smartseq <- computeSumFactors(tm_smartseq)  -->
+<!-- tm_smartseq <- normalize(tm_smartseq) -->
+<!-- tm_smartseq <- runPCA(tm_smartseq) -->
+<!-- set.seed(42) -->
+<!-- tm_smartseq <- runTSNE(tm_smartseq, use_dimred="PCA", perplexity=30) -->
 
-## still giving this error on MBP
-#> tm_smartseq <- scran::computeSumFactors(tm_smartseq)
-# Error in nlsModel(formula, mf, start, wts) : 
-  # singular gradient matrix at initial parameter estimates
-# In addition: There were 12 warnings (use warnings() to see them)
-```
+<!-- ## still giving this error on MBP -->
+<!-- #> tm_smartseq <- scran::computeSumFactors(tm_smartseq) -->
+<!-- # Error in nlsModel(formula, mf, start, wts) :  -->
+<!--   # singular gradient matrix at initial parameter estimates -->
+<!-- # In addition: There were 12 warnings (use warnings() to see them) -->
+<!-- ``` -->
 
-## Clustering with graph-based methods 
+<!-- ## Clustering with graph-based methods  -->
 
-```{r eval=FALSE}
-# We use the shared nearest neighbour method for clustering.
-snn.gr <- buildSNNGraph(tm_smartseq, use.dimred="PCA")
-clusters <- igraph::cluster_walktrap(snn.gr)
-tm_smartseq$Cluster <- factor(clusters$membership)
-table(tm_smartseq$Cluster)
+<!-- ```{r eval=FALSE} -->
+<!-- # We use the shared nearest neighbour method for clustering. -->
+<!-- snn.gr <- buildSNNGraph(tm_smartseq, use.dimred="PCA") -->
+<!-- clusters <- igraph::cluster_walktrap(snn.gr) -->
+<!-- tm_smartseq$Cluster <- factor(clusters$membership) -->
+<!-- table(tm_smartseq$Cluster) -->
 
-# Plotting them out to verify separateness.
-plotTSNE(tm_smartseq, colour_by="Cluster")
+<!-- # Plotting them out to verify separateness. -->
+<!-- plotTSNE(tm_smartseq, colour_by="Cluster") -->
 
-# Also examining their modularity scores.
-# We look at the ratio of the observed and expected edge weights, as the raw modularity varies by orders of magnitudes across clusters.
-cluster.mod <- clusterModularity(snn.gr, tm_smartseq$Cluster, get.values=TRUE)
-log.ratio <- log2(cluster.mod$observed/cluster.mod$expected + 1)
-library(pheatmap)
-pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE,
-         color=colorRampPalette(c("white", "blue"))(100))
+<!-- # Also examining their modularity scores. -->
+<!-- # We look at the ratio of the observed and expected edge weights, as the raw modularity varies by orders of magnitudes across clusters. -->
+<!-- cluster.mod <- clusterModularity(snn.gr, tm_smartseq$Cluster, get.values=TRUE) -->
+<!-- log.ratio <- log2(cluster.mod$observed/cluster.mod$expected + 1) -->
+<!-- library(pheatmap) -->
+<!-- pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE, -->
+<!--          color=colorRampPalette(c("white", "blue"))(100)) -->
 
-# Marker gene detection
-# Detecting marker genes for each cluster.
-marker.out <- findMarkers(tm_smartseq, clusters=tm_smartseq$Cluster)
+<!-- # Marker gene detection -->
+<!-- # Detecting marker genes for each cluster. -->
+<!-- marker.out <- findMarkers(tm_smartseq, clusters=tm_smartseq$Cluster) -->
 
-saveRDS(tm_smartseq,"sce_tabulamuris_processed_smartseq.RDS")
-```
+<!-- saveRDS(tm_smartseq,"sce_tabulamuris_processed_smartseq.RDS") -->
+<!-- ``` -->
 
 
 
