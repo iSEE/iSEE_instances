@@ -1,0 +1,305 @@
+---
+title: "Code for generating an instance of iSEE for the data from Haber et al, 2018"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+**Compiled date**: `r Sys.Date()`
+
+**Last edited**: 2019-06-26
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  error = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+# Data retrieval
+
+Following the instructions in https://github.com/theislab/single-cell-tutorial/
+
+```
+cd ../  #To get to the main github repo folder
+mkdir -p data/Haber-et-al_mouse-intestinal-epithelium/
+cd data/Haber-et-al_mouse-intestinal-epithelium/
+wget ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE92nnn/GSE92332/suppl/GSE92332_RAW.tar
+mkdir GSE92332_RAW
+tar -C GSE92332_RAW -xvf GSE92332_RAW.tar
+gunzip GSE92332_RAW/*_Regional_*
+```
+
+```
+wget ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE92nnn/GSE92332/suppl/GSE92332_Regional_UMIcounts.txt.gz
+gunzip GSE92332_Regional_UMIcounts.txt.gz
+```
+
+Sorry Jenny, gotta do this :)
+
+```{r}
+setwd("iSEE_sctutorial/")
+```
+
+
+# Reading in the data
+
+## Reorganizing the data for the structure expected by `read10xCounts`
+
+```{r}
+dir.create("data/Haber-et-al_mouse-intestinal-epithelium/Duo_M1")
+dir.create("data/Haber-et-al_mouse-intestinal-epithelium/Duo_M2")
+dir.create("data/Haber-et-al_mouse-intestinal-epithelium/Jej_M1")
+dir.create("data/Haber-et-al_mouse-intestinal-epithelium/Jej_M2")
+dir.create("data/Haber-et-al_mouse-intestinal-epithelium/Il_M1")
+dir.create("data/Haber-et-al_mouse-intestinal-epithelium/Il_M2")
+
+## plus, followed by some renaming wizardry to have the 
+# barcodes.tsv
+# genes.tsv    
+# matrix.mtx
+## in each subfolder
+```
+
+
+```{r}
+library(DropletUtils)
+sce_duo_m1 <- read10xCounts("data/Haber-et-al_mouse-intestinal-epithelium/Duo_M1/", col.names=TRUE)
+sce_duo_m2 <- read10xCounts("data/Haber-et-al_mouse-intestinal-epithelium/Duo_M2/", col.names=TRUE)
+sce_jej_m1 <- read10xCounts("data/Haber-et-al_mouse-intestinal-epithelium/Jej_M1/", col.names=TRUE)
+sce_jej_m2 <- read10xCounts("data/Haber-et-al_mouse-intestinal-epithelium/Jej_M2/", col.names=TRUE)
+sce_il_m1 <- read10xCounts("data/Haber-et-al_mouse-intestinal-epithelium/Il_M1/", col.names=TRUE)
+sce_il_m2 <- read10xCounts("data/Haber-et-al_mouse-intestinal-epithelium/Il_M2/", col.names=TRUE)
+```
+
+Annotating the covariates and merging
+
+```{r}
+sce_duo_m1$Sample <- "Duo_M1"
+sce_duo_m2$Sample <- "Duo_M2"
+sce_jej_m1$Sample <- "Jej_M1"
+sce_jej_m2$Sample <- "Jej_M2"
+sce_il_m1$Sample <- "Il_M1"
+sce_il_m2$Sample <- "Il_M2"
+
+sce_duo_m1$organ <- "Duodenum"
+sce_duo_m2$organ <- "Duodenum"
+sce_jej_m1$organ <- "Jejunum"
+sce_jej_m2$organ <- "Jejunum"
+sce_il_m1$organ <- "Ileum"
+sce_il_m2$organ <- "Ileum"
+
+sce_duo_m1$donor <- "Donor1"
+sce_duo_m2$donor <- "Donor2"
+sce_jej_m1$donor <- "Donor1"
+sce_jej_m2$donor <- "Donor2"
+sce_il_m1$donor <- "Donor1"
+sce_il_m2$donor <- "Donor2"
+
+sce <- cbind(sce_duo_m1,sce_duo_m2,sce_jej_m1,sce_jej_m2,sce_il_m1,sce_il_m2)
+```
+
+## Annotating the rows
+
+```{r}
+library(scater)
+rownames(sce) <- gsub("mm10_","",rownames(sce))
+
+rowData(sce)$ID <- gsub("mm10_","",rowData(sce)$ID)
+rowData(sce)$Symbol <- gsub("mm10_","",rowData(sce)$Symbol)
+  
+rownames(sce) <- uniquifyFeatureNames(rowData(sce)$ID, rowData(sce)$Symbol)
+head(rownames(sce))
+
+# We also identify the chromosomal location for each gene. The mitochondrial location is particularly useful for later quality control.
+
+library(EnsDb.Mmusculus.v92)
+location <- mapIds(EnsDb.Mmusculus.v92, keys=rowData(sce)$ID, 
+  column="SEQNAME", keytype="GENEID")
+rowData(sce)$CHR <- location
+summary(location=="MT")
+```
+
+# Quality control on the cells
+
+```{r}
+sce <- calculateQCMetrics(sce, feature_controls=list(Mito=which(location=="MT")))
+
+hist(sce$log10_total_counts, breaks=20, col="grey80",
+     xlab="Log-total UMI count")
+hist(sce$log10_total_features_by_counts, breaks=20, col="grey80",
+     xlab="Log-total number of expressed features")
+hist(sce$pct_counts_Mito, breaks=20, col="grey80",
+     xlab="Proportion of reads in mitochondrial genes")
+
+plotColData(sce, y="log10_total_counts", x="Sample")
+plotColData(sce, y="total_features_by_counts", x="Sample")
+plotColData(sce, y="pct_counts_Mito", x="Sample")
+
+# replicating the figure in the github repo...
+plot(sce$total_counts, sce$total_features_by_counts)
+
+high.mito <- isOutlier(sce$pct_counts_Mito, nmads=3, type="higher")
+sce <- sce[,!high.mito]
+summary(high.mito)
+
+ave <- calcAverage(sce)
+rowData(sce)$AveCount <- ave
+hist(log10(ave), col="grey80")
+
+plotHighestExprs(sce)
+
+libsize.drop <- isOutlier(sce$total_counts, nmads=3, type="lower", 
+  log=TRUE, batch=sce$Sample)
+feature.drop <- isOutlier(sce$total_features_by_counts, nmads=3, type="lower", 
+  log=TRUE, batch=sce$Sample)
+keep <- !(libsize.drop | feature.drop)
+data.frame(ByLibSize=sum(libsize.drop), ByFeature=sum(feature.drop),
+  Remaining=sum(keep))
+```
+
+## Cell cycle phase detection
+
+```{r}
+set.seed(100)
+library(scran)
+mm.pairs <- readRDS(system.file("exdata", "mouse_cycle_markers.rds", 
+  package="scran"))
+assignments <- cyclone(sce, mm.pairs, gene.names=rowData(sce)$ID)
+
+plot(assignments$score$G1, assignments$score$G2M, 
+  xlab="G1 score", ylab="G2/M score", pch=16)
+
+sce$phases <- assignments$phases
+table(sce$phases)
+```
+
+# Normalizing for cell-specific biases
+
+```{r}
+library(scran)
+library(BiocSingular)
+set.seed(1000)
+clusters <- quickCluster(sce, use.ranks=FALSE, BSPARAM=IrlbaParam())
+table(clusters)
+
+sce <- computeSumFactors(sce, min.mean=0.1, cluster=clusters)
+summary(sizeFactors(sce))
+
+plot(sce$total_counts, sizeFactors(sce), log="xy")
+
+sce <- normalize(sce)
+```
+
+# Estimating the mean-variance trend
+
+```{r}
+new.trend <- makeTechTrend(x=sce)
+
+fit <- trendVar(sce, use.spikes=FALSE, loess.args=list(span=0.05))
+plot(fit$mean, fit$var, pch=16)
+curve(fit$trend(x), col="dodgerblue", add=TRUE)
+curve(new.trend(x), col="red", add=TRUE)
+
+fit$trend <- new.trend # overwrite trend.
+dec <- decomposeVar(fit=fit) # use per-gene variance estimates in 'fit'.
+top.dec <- dec[order(dec$bio, decreasing=TRUE),] 
+head(top.dec)
+
+plotExpression(sce, features=rownames(top.dec)[1:10])
+```
+
+# Dimensionality reduction
+
+Starting from PCA and moving then to tSNE
+
+```{r}
+set.seed(1000)
+sce <- denoisePCA(sce, technical=new.trend, BSPARAM=IrlbaParam())
+ncol(reducedDim(sce, "PCA"))
+
+plot(attr(reducedDim(sce), "percentVar"), xlab="PC",
+    ylab="Proportion of variance explained")
+abline(v=ncol(reducedDim(sce, "PCA")), lty=2, col="red")
+
+plotPCA(sce, ncomponents=3, colour_by="log10_total_features_by_counts")
+plotPCA(sce, ncomponents=3, colour_by="log10_total_counts")
+
+set.seed(1000)
+sce <- runTSNE(sce, use_dimred="PCA", perplexity=30)
+plotTSNE(sce, colour_by="log10_total_features_by_counts")
+plotTSNE(sce, colour_by="log10_total_counts")
+
+```
+
+# Clustering with graph-based methods
+
+```{r}
+snn.gr <- buildSNNGraph(sce, use.dimred="PCA")
+clusters <- igraph::cluster_walktrap(snn.gr)
+sce$Cluster <- factor(clusters$membership)
+table(sce$Cluster)
+
+cluster.mod <- clusterModularity(snn.gr, sce$Cluster, get.values=TRUE)
+log.ratio <- log2(cluster.mod$observed/cluster.mod$expected + 1)
+
+library(pheatmap)
+pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE, 
+    color=colorRampPalette(c("white", "blue"))(100))
+
+plotTSNE(sce, colour_by="Cluster")
+```
+
+# Moarrrrrr
+
+```{r}
+# umap to try??
+set.seed(42)
+sce <- runUMAP(sce, use_dimred = "PCA")
+plotUMAP(sce, colour_by="log10_total_features_by_counts")
+plotUMAP(sce, colour_by="log10_total_counts")
+plotUMAP(sce, colour_by="Cluster")
+plotUMAP(sce, colour_by="phases")
+plotTSNE(sce, colour_by="organ")
+```
+
+```{r}
+plotTSNE(sce, colour_by="Defa24")
+plotTSNE(sce, colour_by="Tff3")
+plotTSNE(sce, colour_by="Arg2")
+plotTSNE(sce, colour_by="Slc12a2")
+plotTSNE(sce, colour_by="Apoa1")
+plotTSNE(sce, colour_by="Fabp1")
+
+plotUMAP(sce, colour_by="Defa24")
+plotUMAP(sce, colour_by="Tff3")
+plotUMAP(sce, colour_by="Arg2")
+plotUMAP(sce, colour_by="Slc12a2")
+plotUMAP(sce, colour_by="Apoa1")
+plotUMAP(sce, colour_by="Fabp1")
+```
+
+# Session info {-}
+
+Printing the session information
+
+```{r}
+sessionInfo()
+```
+
+
+
+
