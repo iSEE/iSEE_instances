@@ -260,7 +260,17 @@ library(pheatmap)
 pheatmap(log.ratio, cluster_rows=FALSE, cluster_cols=FALSE, 
     color=colorRampPalette(c("white", "blue"))(100))
 
+# with the louvain clustering algorithm...
+snng_clusters <- igraph::cluster_louvain(snn.gr)
+table(snng_clusters$membership)
+sce$Cluster_louvain <- factor(snng_clusters$membership)
+
 plotTSNE(sce, colour_by="Cluster")
+plotTSNE(sce, colour_by="Cluster_louvain")
+
+multiplot(
+  plotTSNE(sce, colour_by="Cluster"),
+  plotTSNE(sce, colour_by="Cluster_louvain"),cols = 2)
 ```
 
 # Moarrrrrr
