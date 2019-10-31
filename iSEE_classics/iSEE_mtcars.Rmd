@@ -1,0 +1,79 @@
+---
+title: "Code for generating an instance of iSEE for the `mtcars` dataset"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Why?
+
+Because, why not.
+
+# `iSEE` cars
+
+```{r}
+mtcars
+
+library(SingleCellExperiment)
+
+sc_mtcars <- SingleCellExperiment(
+  assays = list(allvariables = t(mtcars[, c("mpg","disp","hp","drat","wt")]))
+)
+colnames(sc_mtcars) <- rownames(mtcars)
+
+colData(sc_mtcars) <- DataFrame(
+  cyl = factor(mtcars$cyl),
+  vs = factor(mtcars$vs),
+  am = factor(mtcars$am),
+  gear = factor(mtcars$gear),
+  carb = factor(mtcars$carb)
+)
+
+sc_mtcars
+
+pca <- prcomp(t(assay(sc_mtcars)))
+percentVar <- pca$sdev^2/sum(pca$sdev^2)
+
+
+d <- data.frame(PC1 = pca$x[, 1],
+                PC2 = pca$x[, 2],
+                PC3 = pca$x[, 3],
+                PC4 = pca$x[, 4])
+
+reducedDim(sc_mtcars, "PCA") <- d
+
+# library(scater)
+# sc_mtcars <- runPCA(sc_mtcars)
+# sc_mtcars <- runTSNE(sc_mtcars, dimred = "PCA")
+
+sc_mtcars
+colData(sc_mtcars)
+```
+
+```{r}
+library(iSEE)
+
+if(interactive()){
+  iSEE(sc_mtcars)
+}
+```
+
+
+## Session info {-}
+
+Printing the session information
+
+```{r}
+sessionInfo()
+```
+
