@@ -1,0 +1,741 @@
+---
+title: "Code for generating an instance of iSEE for the `diamonds` dataset"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Why?
+
+Because, bling bling `iSEE`.
+
+# `iSEE` diamonds.
+
+```{r}
+library(ggplot2)
+diamonds
+library(SingleCellExperiment)
+
+sc_diamonds <- SingleCellExperiment(
+  assays = list(logcounts = t(diamonds[,c("x","y","z")]))
+)
+
+colnames(sc_diamonds) <- paste0("id_", seq_len(nrow(diamonds)) )
+
+colData(sc_diamonds) <- DataFrame(
+  cut = diamonds$cut,
+  color = diamonds$color,
+  clarity = diamonds$clarity,
+  carat = diamonds$carat,
+  depth = diamonds$depth,
+  table = diamonds$table,
+  price = diamonds$price
+)
+
+# pca <- prcomp(t(assay(sc_diamonds)))
+# percentVar <- pca$sdev^2/sum(pca$sdev^2)
+
+
+# d <- data.frame(PC1 = pca$x[, 1],
+#                 PC2 = pca$x[, 1],
+#                 PC2 = pca$x[, 3],
+#                 PC2 = pca$x[, 4])
+
+# reducedDim(sc_diamonds, "PCA") <- d
+
+library(scater)
+```
+
+
+```{r cache=TRUE}
+sc_diamonds <- runPCA(sc_diamonds)
+sc_diamonds <- runTSNE(sc_diamonds, dimred = "PCA")
+```
+
+```{r}
+sc_diamonds
+colData(sc_diamonds)
+```
+
+```{r}
+library(iSEE)
+if(interactive())
+  iSEE(sc_diamonds)
+```
+
+
+## Storing the R code for panels & plots
+
+```{r}
+################################################################################
+# Settings for reduced dimension plots
+################################################################################
+
+redDimPlotArgs <- new('DataFrame', nrows=5L, rownames=sprintf('redDimPlot%i', seq_len(5)))
+redDimPlotArgs[['Type']] <- c(2L, 1L, 1L, 1L, 1L)
+redDimPlotArgs[['XAxis']] <- c(1L, 1L, 1L, 1L, 1L)
+redDimPlotArgs[['YAxis']] <- c(2L, 2L, 2L, 2L, 2L)
+redDimPlotArgs[['DataBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+redDimPlotArgs[['VisualBoxOpen']] <- c(TRUE, FALSE, FALSE, FALSE, FALSE)
+redDimPlotArgs[['SelectBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+redDimPlotArgs[['SelectByPlot']] <- c("---", "---", "---", "---", "---")
+redDimPlotArgs[['SelectEffect']] <- c("Transparent", "Transparent", "Transparent", "Transparent", "Transparent")
+redDimPlotArgs[['SelectAlpha']] <- c(0.1, 0.1, 0.1, 0.1, 0.1)
+redDimPlotArgs[['SelectColor']] <- c("#FF0000", "red", "red", "red", "red")
+
+tmp <- vector('list', 5)
+redDimPlotArgs[['BrushData']] <- tmp
+
+tmp <- vector('list', 5)
+tmp[[1]] <- list()
+redDimPlotArgs[['MultiSelectHistory']] <- tmp
+redDimPlotArgs[['SelectMultiType']] <- c("Active", "Active", "Active", "Active", "Active")
+redDimPlotArgs[['SelectMultiSaved']] <- c(0L, 0L, 0L, 0L, 0L)
+
+tmp <- vector('list', 5)
+tmp[[1]] <- "Color"
+tmp[[2]] <- "Color"
+tmp[[3]] <- "Color"
+tmp[[4]] <- "Color"
+tmp[[5]] <- "Color"
+redDimPlotArgs[['VisualChoices']] <- tmp
+redDimPlotArgs[['PointSize']] <- c(1, 1, 1, 1, 1)
+redDimPlotArgs[['PointAlpha']] <- c(1, 1, 1, 1, 1)
+redDimPlotArgs[['Downsample']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+redDimPlotArgs[['SampleRes']] <- c(200, 200, 200, 200, 200)
+redDimPlotArgs[['FontSize']] <- c(1, 1, 1, 1, 1)
+redDimPlotArgs[['LegendPosition']] <- c("Bottom", "Bottom", "Bottom", "Bottom", "Bottom")
+
+tmp <- vector('list', 5)
+redDimPlotArgs[['ZoomData']] <- tmp
+
+tmp <- vector('list', 5)
+tmp[[1]] <- list(lasso = NULL, closed = TRUE, panelvar1 = NULL, panelvar2 = NULL, mapping = list(
+        x = "X", y = "Y", colour = "ColorBy"), coord = structure(c(39.9724681919928, 
+    38.311160188712, 39.5571411911726, 46.8253637055261, 51.1862972141382, 46.8253637055261, 
+    39.9724681919928, -3.00883851328672, -12.0842385207313, -18.8907885263148, -18.8907885263148, 
+    6.06656149415788, 9.34378927462399, -3.00883851328672), .Dim = c(7L, 2L)))
+redDimPlotArgs[['LassoData']] <- tmp
+redDimPlotArgs[['ContourAdd']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+redDimPlotArgs[['ContourColor']] <- c("#0000FF", "blue", "blue", "blue", "blue")
+redDimPlotArgs[['ColorBy']] <- c("Column data", "None", "None", "None", "None")
+redDimPlotArgs[['ColorByDefaultColor']] <- c("#000000", "black", "black", "black", "black")
+redDimPlotArgs[['ColorByColData']] <- c("price", "cut", "cut", "cut", "cut")
+redDimPlotArgs[['ShapeBy']] <- c("None", "None", "None", "None", "None")
+redDimPlotArgs[['ShapeByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+redDimPlotArgs[['SizeBy']] <- c("None", "None", "None", "None", "None")
+redDimPlotArgs[['SizeByColData']] <- c("carat", "carat", "carat", "carat", "carat")
+redDimPlotArgs[['ColorByRowTable']] <- c("---", "---", "---", "---", "---")
+redDimPlotArgs[['ColorByFeatName']] <- c(1L, 1L, 1L, 1L, 1L)
+redDimPlotArgs[['ColorByFeatNameAssay']] <- c(1L, 1L, 1L, 1L, 1L)
+redDimPlotArgs[['ColorByColTable']] <- c("---", "---", "---", "---", "---")
+redDimPlotArgs[['ColorBySampName']] <- c(1L, 1L, 1L, 1L, 1L)
+redDimPlotArgs[['ColorBySampNameColor']] <- c("#FF0000", "red", "red", "red", "red")
+redDimPlotArgs[['FacetByRow']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+redDimPlotArgs[['FacetByColumn']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+redDimPlotArgs[['RowFacetByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+redDimPlotArgs[['ColumnFacetByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+
+################################################################################
+# Settings for column data plots
+################################################################################
+
+colDataPlotArgs <- new('DataFrame', nrows=5L, rownames=sprintf('colDataPlot%i', seq_len(5)))
+colDataPlotArgs[['YAxis']] <- c("cut", "cut", "cut", "cut", "cut")
+colDataPlotArgs[['XAxis']] <- c("None", "None", "None", "None", "None")
+colDataPlotArgs[['XAxisColData']] <- c("color", "color", "color", "color", "color")
+colDataPlotArgs[['DataBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+colDataPlotArgs[['VisualBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+colDataPlotArgs[['SelectBoxOpen']] <- c(TRUE, FALSE, FALSE, FALSE, FALSE)
+colDataPlotArgs[['SelectByPlot']] <- c("Reduced dimension plot 1", "---", "---", "---", "---")
+colDataPlotArgs[['SelectEffect']] <- c("Color", "Transparent", "Transparent", "Transparent", "Transparent")
+colDataPlotArgs[['SelectAlpha']] <- c(0.1, 0.1, 0.1, 0.1, 0.1)
+colDataPlotArgs[['SelectColor']] <- c("#FF0000", "red", "red", "red", "red")
+
+tmp <- vector('list', 5)
+colDataPlotArgs[['BrushData']] <- tmp
+
+tmp <- vector('list', 5)
+colDataPlotArgs[['MultiSelectHistory']] <- tmp
+colDataPlotArgs[['SelectMultiType']] <- c("Active", "Active", "Active", "Active", "Active")
+colDataPlotArgs[['SelectMultiSaved']] <- c(0L, 0L, 0L, 0L, 0L)
+
+tmp <- vector('list', 5)
+tmp[[1]] <- "Color"
+tmp[[2]] <- "Color"
+tmp[[3]] <- "Color"
+tmp[[4]] <- "Color"
+tmp[[5]] <- "Color"
+colDataPlotArgs[['VisualChoices']] <- tmp
+colDataPlotArgs[['PointSize']] <- c(1, 1, 1, 1, 1)
+colDataPlotArgs[['PointAlpha']] <- c(1, 1, 1, 1, 1)
+colDataPlotArgs[['Downsample']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+colDataPlotArgs[['SampleRes']] <- c(200, 200, 200, 200, 200)
+colDataPlotArgs[['FontSize']] <- c(1, 1, 1, 1, 1)
+colDataPlotArgs[['LegendPosition']] <- c("Bottom", "Bottom", "Bottom", "Bottom", "Bottom")
+
+tmp <- vector('list', 5)
+colDataPlotArgs[['ZoomData']] <- tmp
+
+tmp <- vector('list', 5)
+colDataPlotArgs[['LassoData']] <- tmp
+colDataPlotArgs[['ContourAdd']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+colDataPlotArgs[['ContourColor']] <- c("#0000FF", "blue", "blue", "blue", "blue")
+colDataPlotArgs[['ColorBy']] <- c("None", "None", "None", "None", "None")
+colDataPlotArgs[['ColorByDefaultColor']] <- c("#000000", "black", "black", "black", "black")
+colDataPlotArgs[['ColorByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+colDataPlotArgs[['ShapeBy']] <- c("None", "None", "None", "None", "None")
+colDataPlotArgs[['ShapeByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+colDataPlotArgs[['SizeBy']] <- c("None", "None", "None", "None", "None")
+colDataPlotArgs[['SizeByColData']] <- c("carat", "carat", "carat", "carat", "carat")
+colDataPlotArgs[['ColorByRowTable']] <- c("---", "---", "---", "---", "---")
+colDataPlotArgs[['ColorByFeatName']] <- c(1L, 1L, 1L, 1L, 1L)
+colDataPlotArgs[['ColorByFeatNameAssay']] <- c(1L, 1L, 1L, 1L, 1L)
+colDataPlotArgs[['ColorByColTable']] <- c("---", "---", "---", "---", "---")
+colDataPlotArgs[['ColorBySampName']] <- c(1L, 1L, 1L, 1L, 1L)
+colDataPlotArgs[['ColorBySampNameColor']] <- c("#FF0000", "red", "red", "red", "red")
+colDataPlotArgs[['FacetByRow']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+colDataPlotArgs[['FacetByColumn']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+colDataPlotArgs[['RowFacetByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+colDataPlotArgs[['ColumnFacetByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+
+################################################################################
+# Settings for feature assay plots
+################################################################################
+
+featAssayPlotArgs <- new('DataFrame', nrows=5L, rownames=sprintf('featAssayPlot%i', seq_len(5)))
+featAssayPlotArgs[['Assay']] <- c(1L, 1L, 1L, 1L, 1L)
+featAssayPlotArgs[['XAxis']] <- c("Column data", "None", "None", "None", "None")
+featAssayPlotArgs[['XAxisColData']] <- c("price", "cut", "cut", "cut", "cut")
+featAssayPlotArgs[['XAxisFeatName']] <- c(1L, 1L, 1L, 1L, 1L)
+featAssayPlotArgs[['XAxisRowTable']] <- c("---", "---", "---", "---", "---")
+featAssayPlotArgs[['YAxisFeatName']] <- c(1L, 1L, 1L, 1L, 1L)
+featAssayPlotArgs[['YAxisRowTable']] <- c("---", "---", "---", "---", "---")
+featAssayPlotArgs[['DataBoxOpen']] <- c(TRUE, FALSE, FALSE, FALSE, FALSE)
+featAssayPlotArgs[['VisualBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+featAssayPlotArgs[['SelectBoxOpen']] <- c(TRUE, FALSE, FALSE, FALSE, FALSE)
+featAssayPlotArgs[['SelectByPlot']] <- c("Reduced dimension plot 1", "---", "---", "---", "---")
+featAssayPlotArgs[['SelectEffect']] <- c("Color", "Transparent", "Transparent", "Transparent", "Transparent")
+featAssayPlotArgs[['SelectAlpha']] <- c(0.1, 0.1, 0.1, 0.1, 0.1)
+featAssayPlotArgs[['SelectColor']] <- c("#FF0000", "red", "red", "red", "red")
+
+tmp <- vector('list', 5)
+featAssayPlotArgs[['BrushData']] <- tmp
+
+tmp <- vector('list', 5)
+tmp[[1]] <- list()
+featAssayPlotArgs[['MultiSelectHistory']] <- tmp
+featAssayPlotArgs[['SelectMultiType']] <- c("Active", "Active", "Active", "Active", "Active")
+featAssayPlotArgs[['SelectMultiSaved']] <- c(0L, 0L, 0L, 0L, 0L)
+
+tmp <- vector('list', 5)
+tmp[[1]] <- "Color"
+tmp[[2]] <- "Color"
+tmp[[3]] <- "Color"
+tmp[[4]] <- "Color"
+tmp[[5]] <- "Color"
+featAssayPlotArgs[['VisualChoices']] <- tmp
+featAssayPlotArgs[['PointSize']] <- c(1, 1, 1, 1, 1)
+featAssayPlotArgs[['PointAlpha']] <- c(1, 1, 1, 1, 1)
+featAssayPlotArgs[['Downsample']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+featAssayPlotArgs[['SampleRes']] <- c(200, 200, 200, 200, 200)
+featAssayPlotArgs[['FontSize']] <- c(1, 1, 1, 1, 1)
+featAssayPlotArgs[['LegendPosition']] <- c("Bottom", "Bottom", "Bottom", "Bottom", "Bottom")
+
+tmp <- vector('list', 5)
+featAssayPlotArgs[['ZoomData']] <- tmp
+
+tmp <- vector('list', 5)
+featAssayPlotArgs[['LassoData']] <- tmp
+featAssayPlotArgs[['ContourAdd']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+featAssayPlotArgs[['ContourColor']] <- c("#0000FF", "blue", "blue", "blue", "blue")
+featAssayPlotArgs[['ColorBy']] <- c("None", "None", "None", "None", "None")
+featAssayPlotArgs[['ColorByDefaultColor']] <- c("#000000", "black", "black", "black", "black")
+featAssayPlotArgs[['ColorByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+featAssayPlotArgs[['ShapeBy']] <- c("None", "None", "None", "None", "None")
+featAssayPlotArgs[['ShapeByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+featAssayPlotArgs[['SizeBy']] <- c("None", "None", "None", "None", "None")
+featAssayPlotArgs[['SizeByColData']] <- c("carat", "carat", "carat", "carat", "carat")
+featAssayPlotArgs[['ColorByRowTable']] <- c("---", "---", "---", "---", "---")
+featAssayPlotArgs[['ColorByFeatName']] <- c(1L, 1L, 1L, 1L, 1L)
+featAssayPlotArgs[['ColorByFeatNameAssay']] <- c(1L, 1L, 1L, 1L, 1L)
+featAssayPlotArgs[['ColorByColTable']] <- c("---", "---", "---", "---", "---")
+featAssayPlotArgs[['ColorBySampName']] <- c(1L, 1L, 1L, 1L, 1L)
+featAssayPlotArgs[['ColorBySampNameColor']] <- c("#FF0000", "red", "red", "red", "red")
+featAssayPlotArgs[['FacetByRow']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+featAssayPlotArgs[['FacetByColumn']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+featAssayPlotArgs[['RowFacetByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+featAssayPlotArgs[['ColumnFacetByColData']] <- c("cut", "cut", "cut", "cut", "cut")
+
+################################################################################
+# Settings for row statistics tables
+################################################################################
+
+rowStatTableArgs <- new('DataFrame', nrows=5L, rownames=sprintf('rowStatTable%i', seq_len(5)))
+rowStatTableArgs[['Selected']] <- c(1L, 1L, 1L, 1L, 1L)
+rowStatTableArgs[['Search']] <- c("", "", "", "", "")
+
+tmp <- vector('list', 5)
+tmp[[1]] <- ""
+tmp[[2]] <- character(0)
+tmp[[3]] <- character(0)
+tmp[[4]] <- character(0)
+tmp[[5]] <- character(0)
+rowStatTableArgs[['SearchColumns']] <- tmp
+rowStatTableArgs[['SelectBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+rowStatTableArgs[['SelectByPlot']] <- c("---", "---", "---", "---", "---")
+rowStatTableArgs[['SelectMultiType']] <- c("Active", "Active", "Active", "Active", "Active")
+rowStatTableArgs[['SelectMultiSaved']] <- c(0L, 0L, 0L, 0L, 0L)
+
+################################################################################
+# Settings for row data plots
+################################################################################
+
+rowDataPlotArgs <- new('DataFrame', nrows=0L, rownames=sprintf('rowDataPlot%i', seq_len(0)))
+rowDataPlotArgs[['YAxis']] <- character(0)
+rowDataPlotArgs[['XAxis']] <- character(0)
+rowDataPlotArgs[['XAxisRowData']] <- character(0)
+rowDataPlotArgs[['DataBoxOpen']] <- logical(0)
+rowDataPlotArgs[['VisualBoxOpen']] <- logical(0)
+rowDataPlotArgs[['SelectBoxOpen']] <- logical(0)
+rowDataPlotArgs[['SelectByPlot']] <- character(0)
+rowDataPlotArgs[['SelectEffect']] <- character(0)
+rowDataPlotArgs[['SelectAlpha']] <- numeric(0)
+rowDataPlotArgs[['SelectColor']] <- character(0)
+
+tmp <- vector('list', 0)
+rowDataPlotArgs[['BrushData']] <- tmp
+
+tmp <- vector('list', 0)
+rowDataPlotArgs[['MultiSelectHistory']] <- tmp
+rowDataPlotArgs[['SelectMultiType']] <- character(0)
+rowDataPlotArgs[['SelectMultiSaved']] <- integer(0)
+
+tmp <- vector('list', 0)
+rowDataPlotArgs[['VisualChoices']] <- tmp
+rowDataPlotArgs[['PointSize']] <- numeric(0)
+rowDataPlotArgs[['PointAlpha']] <- numeric(0)
+rowDataPlotArgs[['Downsample']] <- logical(0)
+rowDataPlotArgs[['SampleRes']] <- numeric(0)
+rowDataPlotArgs[['FontSize']] <- numeric(0)
+rowDataPlotArgs[['LegendPosition']] <- character(0)
+
+tmp <- vector('list', 0)
+rowDataPlotArgs[['ZoomData']] <- tmp
+
+tmp <- vector('list', 0)
+rowDataPlotArgs[['LassoData']] <- tmp
+rowDataPlotArgs[['ContourAdd']] <- logical(0)
+rowDataPlotArgs[['ContourColor']] <- character(0)
+rowDataPlotArgs[['ColorBy']] <- character(0)
+rowDataPlotArgs[['ColorByDefaultColor']] <- character(0)
+rowDataPlotArgs[['ColorByRowData']] <- character(0)
+rowDataPlotArgs[['ShapeBy']] <- character(0)
+rowDataPlotArgs[['ShapeByRowData']] <- character(0)
+rowDataPlotArgs[['SizeBy']] <- character(0)
+rowDataPlotArgs[['SizeByRowData']] <- character(0)
+rowDataPlotArgs[['ColorByRowTable']] <- character(0)
+rowDataPlotArgs[['ColorByFeatName']] <- integer(0)
+rowDataPlotArgs[['ColorByFeatNameColor']] <- character(0)
+rowDataPlotArgs[['ColorByColTable']] <- character(0)
+rowDataPlotArgs[['ColorBySampName']] <- integer(0)
+rowDataPlotArgs[['ColorBySampNameAssay']] <- integer(0)
+rowDataPlotArgs[['FacetByRow']] <- logical(0)
+rowDataPlotArgs[['FacetByColumn']] <- logical(0)
+rowDataPlotArgs[['RowFacetByRowData']] <- character(0)
+rowDataPlotArgs[['ColumnFacetByRowData']] <- character(0)
+
+################################################################################
+# Settings for sample assay plots
+################################################################################
+
+sampAssayPlotArgs <- new('DataFrame', nrows=5L, rownames=sprintf('sampAssayPlot%i', seq_len(5)))
+sampAssayPlotArgs[['YAxisSampName']] <- c(1L, 1L, 1L, 1L, 1L)
+sampAssayPlotArgs[['YAxisColTable']] <- c("---", "---", "---", "---", "---")
+sampAssayPlotArgs[['Assay']] <- c(1L, 1L, 1L, 1L, 1L)
+sampAssayPlotArgs[['XAxis']] <- c("None", "None", "None", "None", "None")
+sampAssayPlotArgs[['XAxisRowData']] <- c("", NA, NA, NA, NA)
+sampAssayPlotArgs[['XAxisSampName']] <- c(2L, 2L, 2L, 2L, 2L)
+sampAssayPlotArgs[['XAxisColTable']] <- c("---", "---", "---", "---", "---")
+sampAssayPlotArgs[['DataBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+sampAssayPlotArgs[['VisualBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+sampAssayPlotArgs[['SelectBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+sampAssayPlotArgs[['SelectByPlot']] <- c("---", "---", "---", "---", "---")
+sampAssayPlotArgs[['SelectEffect']] <- c("Transparent", "Transparent", "Transparent", "Transparent", "Transparent")
+sampAssayPlotArgs[['SelectAlpha']] <- c(0.1, 0.1, 0.1, 0.1, 0.1)
+sampAssayPlotArgs[['SelectColor']] <- c("#FF0000", "red", "red", "red", "red")
+
+tmp <- vector('list', 5)
+sampAssayPlotArgs[['BrushData']] <- tmp
+
+tmp <- vector('list', 5)
+tmp[[1]] <- list()
+sampAssayPlotArgs[['MultiSelectHistory']] <- tmp
+sampAssayPlotArgs[['SelectMultiType']] <- c("Active", "Active", "Active", "Active", "Active")
+sampAssayPlotArgs[['SelectMultiSaved']] <- c(0L, 0L, 0L, 0L, 0L)
+
+tmp <- vector('list', 5)
+tmp[[1]] <- "Color"
+tmp[[2]] <- "Color"
+tmp[[3]] <- "Color"
+tmp[[4]] <- "Color"
+tmp[[5]] <- "Color"
+sampAssayPlotArgs[['VisualChoices']] <- tmp
+sampAssayPlotArgs[['PointSize']] <- c(1, 1, 1, 1, 1)
+sampAssayPlotArgs[['PointAlpha']] <- c(1, 1, 1, 1, 1)
+sampAssayPlotArgs[['Downsample']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+sampAssayPlotArgs[['SampleRes']] <- c(200, 200, 200, 200, 200)
+sampAssayPlotArgs[['FontSize']] <- c(1, 1, 1, 1, 1)
+sampAssayPlotArgs[['LegendPosition']] <- c("Bottom", "Bottom", "Bottom", "Bottom", "Bottom")
+
+tmp <- vector('list', 5)
+sampAssayPlotArgs[['ZoomData']] <- tmp
+
+tmp <- vector('list', 5)
+sampAssayPlotArgs[['LassoData']] <- tmp
+sampAssayPlotArgs[['ContourAdd']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+sampAssayPlotArgs[['ContourColor']] <- c("blue", "blue", "blue", "blue", "blue")
+sampAssayPlotArgs[['ColorBy']] <- c("None", "None", "None", "None", "None")
+sampAssayPlotArgs[['ColorByDefaultColor']] <- c("#000000", "black", "black", "black", "black")
+sampAssayPlotArgs[['ColorByRowData']] <- c("", NA, NA, NA, NA)
+sampAssayPlotArgs[['ShapeBy']] <- c("None", "None", "None", "None", "None")
+sampAssayPlotArgs[['ShapeByRowData']] <- c("", NA, NA, NA, NA)
+sampAssayPlotArgs[['SizeBy']] <- c("None", "None", "None", "None", "None")
+sampAssayPlotArgs[['SizeByRowData']] <- c("", NA, NA, NA, NA)
+sampAssayPlotArgs[['ColorByRowTable']] <- c("---", "---", "---", "---", "---")
+sampAssayPlotArgs[['ColorByFeatName']] <- c(1L, 1L, 1L, 1L, 1L)
+sampAssayPlotArgs[['ColorByFeatNameColor']] <- c("#FF0000", "red", "red", "red", "red")
+sampAssayPlotArgs[['ColorByColTable']] <- c("---", "---", "---", "---", "---")
+sampAssayPlotArgs[['ColorBySampName']] <- c(1L, 1L, 1L, 1L, 1L)
+sampAssayPlotArgs[['ColorBySampNameAssay']] <- c(1L, 1L, 1L, 1L, 1L)
+sampAssayPlotArgs[['FacetByRow']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+sampAssayPlotArgs[['FacetByColumn']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+sampAssayPlotArgs[['RowFacetByRowData']] <- c(NA_character_, NA_character_, NA_character_, NA_character_, NA_character_)
+sampAssayPlotArgs[['ColumnFacetByRowData']] <- c(NA_character_, NA_character_, NA_character_, NA_character_, NA_character_)
+
+################################################################################
+# Settings for column statistics tables
+################################################################################
+
+colStatTableArgs <- new('DataFrame', nrows=5L, rownames=sprintf('colStatTable%i', seq_len(5)))
+colStatTableArgs[['Selected']] <- c(1L, 1L, 1L, 1L, 1L)
+colStatTableArgs[['Search']] <- c("", "", "", "", "")
+
+tmp <- vector('list', 5)
+tmp[[1]] <- c("", "", "", "", "", "", "")
+tmp[[2]] <- c("", "", "", "", "", "", "")
+tmp[[3]] <- c("", "", "", "", "", "", "")
+tmp[[4]] <- c("", "", "", "", "", "", "")
+tmp[[5]] <- c("", "", "", "", "", "", "")
+colStatTableArgs[['SearchColumns']] <- tmp
+colStatTableArgs[['SelectBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+colStatTableArgs[['SelectByPlot']] <- c("---", "---", "---", "---", "---")
+colStatTableArgs[['SelectMultiType']] <- c("Active", "Active", "Active", "Active", "Active")
+colStatTableArgs[['SelectMultiSaved']] <- c(0L, 0L, 0L, 0L, 0L)
+
+################################################################################
+# Settings for custom data plots
+################################################################################
+
+customDataPlotArgs <- new('DataFrame', nrows=0L, rownames=sprintf('customDataPlot%i', seq_len(0)))
+customDataPlotArgs[['Function']] <- character(0)
+customDataPlotArgs[['Arguments']] <- character(0)
+customDataPlotArgs[['VisibleArgs']] <- logical(0)
+customDataPlotArgs[['ColumnSource']] <- character(0)
+customDataPlotArgs[['RowSource']] <- character(0)
+customDataPlotArgs[['DataBoxOpen']] <- logical(0)
+customDataPlotArgs[['SelectBoxOpen']] <- logical(0)
+
+################################################################################
+# Settings for custom statistics tables
+################################################################################
+
+customStatTableArgs <- new('DataFrame', nrows=0L, rownames=sprintf('customStatTable%i', seq_len(0)))
+customStatTableArgs[['Function']] <- character(0)
+customStatTableArgs[['Arguments']] <- character(0)
+customStatTableArgs[['VisibleArgs']] <- logical(0)
+customStatTableArgs[['ColumnSource']] <- character(0)
+customStatTableArgs[['RowSource']] <- character(0)
+customStatTableArgs[['DataBoxOpen']] <- logical(0)
+customStatTableArgs[['SelectBoxOpen']] <- logical(0)
+customStatTableArgs[['Search']] <- character(0)
+
+################################################################################
+# Settings for heat maps
+################################################################################
+
+heatMapPlotArgs <- new('DataFrame', nrows=5L, rownames=sprintf('heatMapPlot%i', seq_len(5)))
+heatMapPlotArgs[['Assay']] <- c(1L, 1L, 1L, 1L, 1L)
+heatMapPlotArgs[['FeatNameBoxOpen']] <- c(TRUE, FALSE, FALSE, FALSE, FALSE)
+
+tmp <- vector('list', 5)
+tmp[[1]] <- 1:3
+tmp[[2]] <- 1L
+tmp[[3]] <- 1L
+tmp[[4]] <- 1L
+tmp[[5]] <- 1L
+heatMapPlotArgs[['FeatName']] <- tmp
+heatMapPlotArgs[['ColDataBoxOpen']] <- c(TRUE, FALSE, FALSE, FALSE, FALSE)
+
+tmp <- vector('list', 5)
+tmp[[1]] <- "price"
+tmp[[2]] <- "cut"
+tmp[[3]] <- "cut"
+tmp[[4]] <- "cut"
+tmp[[5]] <- "cut"
+heatMapPlotArgs[['ColData']] <- tmp
+heatMapPlotArgs[['FeatNameSource']] <- c("---", "---", "---", "---", "---")
+
+tmp <- vector('list', 5)
+tmp[[1]] <- "Centered"
+tmp[[2]] <- "Centered"
+tmp[[3]] <- "Centered"
+tmp[[4]] <- "Centered"
+tmp[[5]] <- "Centered"
+heatMapPlotArgs[['CenterScale']] <- tmp
+heatMapPlotArgs[['Lower']] <- c(-3, -Inf, -Inf, -Inf, -Inf)
+heatMapPlotArgs[['Upper']] <- c(5, Inf, Inf, Inf, Inf)
+heatMapPlotArgs[['ColorScale']] <- c("purple-black-yellow", "purple-black-yellow", "purple-black-yellow", "purple-black-yellow", 
+    "purple-black-yellow")
+
+tmp <- vector('list', 5)
+heatMapPlotArgs[['ZoomData']] <- tmp
+heatMapPlotArgs[['SelectBoxOpen']] <- c(FALSE, FALSE, FALSE, FALSE, FALSE)
+heatMapPlotArgs[['SelectByPlot']] <- c("---", "---", "---", "---", "---")
+heatMapPlotArgs[['SelectEffect']] <- c("Transparent", "Transparent", "Transparent", "Transparent", "Transparent")
+heatMapPlotArgs[['SelectAlpha']] <- c(0.1, 0.1, 0.1, 0.1, 0.1)
+heatMapPlotArgs[['SelectColor']] <- c("red", "red", "red", "red", "red")
+heatMapPlotArgs[['SelectMultiType']] <- c("Active", "Active", "Active", "Active", "Active")
+heatMapPlotArgs[['SelectMultiSaved']] <- c(0L, 0L, 0L, 0L, 0L)
+
+
+################################################################################
+# Initial panel settings
+################################################################################
+
+initialPanels <- DataFrame(
+    Name=c("Reduced dimension plot 1", "Column data plot 1", "Feature assay plot 1", "Row statistics table 1", 
+        "Sample assay plot 1", "Column statistics table 1", "Heat map 1"),
+    Width=c(4L, 4L, 4L, 4L, 4L, 4L, 4L),
+    Height=c(500L, 500L, 500L, 500L, 500L, 500L, 500L)
+)
+```
+
+```{r}
+## The following list of commands will generate the plots created in iSEE
+## Copy them into a script or an R session containing your SingleCellExperiment.
+## All commands below refer to your SingleCellExperiment object as `se`.
+
+se <- sc_diamonds
+colnames(se) <- sprintf("SAMPLE_%i", seq_len(ncol(se)))
+colormap <- ExperimentColorMap()
+colormap <- synchronizeAssays(colormap, se)
+all_coordinates <- list()
+custom_data_fun <- NULL
+custom_stat_fun <- NULL
+
+################################################################################
+# Defining lassos
+################################################################################
+
+all_lassos <- list()
+all_lassos[['redDimPlot1']] <- list(lasso = NULL, closed = TRUE, panelvar1 = NULL, panelvar2 = NULL, mapping = list(
+        x = "X", y = "Y", colour = "ColorBy"), coord = structure(c(39.9724681919928, 
+    38.311160188712, 39.5571411911726, 46.8253637055261, 51.1862972141382, 46.8253637055261, 
+    39.9724681919928, -3.00883851328672, -12.0842385207313, -18.8907885263148, -18.8907885263148, 
+    6.06656149415788, 9.34378927462399, -3.00883851328672), .Dim = c(7L, 2L)))
+
+################################################################################
+## Reduced dimension plot 1
+################################################################################
+
+red.dim <- reducedDim(se, 2);
+plot.data <- data.frame(X=red.dim[, 1], Y=red.dim[, 2], row.names=colnames(se));
+plot.data$ColorBy <- colData(se)[, "price"];
+plot.data <- subset(plot.data, !is.na(X) & !is.na(Y));
+
+# Saving data for transmission
+all_coordinates[['redDimPlot1']] <- plot.data
+
+# Creating the plot
+ggplot() +
+    geom_point(aes(x=X, y=Y, color=ColorBy), alpha=1, plot.data, size=1) +
+    labs(x="Dimension 1", y="Dimension 2", color="price", title="(2) TSNE") +
+    coord_cartesian(xlim=range(plot.data$X, na.rm=TRUE),
+        ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_color_gradientn(colors=colDataColorMap(colormap, "price", discrete=FALSE)(21), na.value='grey50', limits=range(plot.data$ColorBy, na.rm=TRUE)) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.box='vertical', legend.text=element_text(size=9), legend.title=element_text(size=11),
+            axis.text=element_text(size=10), axis.title=element_text(size=12), title=element_text(size=12)) +
+    geom_polygon(aes(x=X, y=Y), alpha=0.25, color='#3565AA',
+            data=data.frame(X=all_lassos[['redDimPlot1']]$coord[, 1], Y=all_lassos[['redDimPlot1']]$coord[, 2]),
+            inherit.aes=FALSE, fill='#D6E0EE') +
+    scale_fill_manual(values=c('TRUE'='#3565AA', 'FALSE'='#D6E0EE'), labels=NULL) +
+    guides(shape='none')
+
+################################################################################
+## Sample assay plot 1
+################################################################################
+
+plot.data <- data.frame(Y=assay(se, 1, withDimnames=FALSE)[,1], row.names=rownames(se));
+plot.data$X <- factor(character(nrow(se)));
+plot.data <- subset(plot.data, !is.na(X) & !is.na(Y));
+
+# Saving data for transmission
+all_coordinates[['sampAssayPlot1']] <- plot.data
+
+# Setting up plot coordinates
+plot.data$GroupBy <- plot.data$X;
+set.seed(100);
+plot.data$jitteredX <- iSEE::jitterViolinPoints(plot.data$X, plot.data$Y, 
+    width=0.4, varwidth=FALSE, adjust=1,
+    method='quasirandom', nbins=NULL);
+
+# Creating the plot
+ggplot() +
+    geom_violin(aes(x=X, y=Y, group=GroupBy), alpha=0.2, data=plot.data, scale='width', width=0.8) +
+    geom_point(aes(y=Y, x=jitteredX), alpha=1, plot.data, color='#000000', size=1) +
+    labs(x="", y="SAMPLE_1 (logcounts)", title="SAMPLE_1") +
+    coord_cartesian(ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_x_discrete(drop=FALSE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.text=element_text(size=9),
+            legend.title=element_text(size=11), legend.box='vertical',
+            axis.text.x=element_text(angle=90, size=10, hjust=1, vjust=0.5),
+            axis.text.y=element_text(size=10),
+            axis.title=element_text(size=12), title=element_text(size=12))
+
+################################################################################
+## Column data plot 1
+################################################################################
+
+plot.data <- data.frame(Y=colData(se)[, "cut"], row.names=colnames(se));
+plot.data$X <- factor(character(ncol(se)))
+plot.data <- subset(plot.data, !is.na(X) & !is.na(Y));
+
+# Receiving point selection
+selected_pts <- rownames(lassoPoints(all_coordinates[['redDimPlot1']], all_lassos[['redDimPlot1']]));
+plot.data$SelectBy <- rownames(plot.data) %in% selected_pts;
+
+# Saving data for transmission
+all_coordinates[['colDataPlot1']] <- plot.data
+
+# Setting up plot coordinates
+set.seed(100);
+j.out <- iSEE:::jitterSquarePoints(plot.data$X, plot.data$Y);
+summary.data <- j.out$summary;
+plot.data$jitteredX <- j.out$X;
+plot.data$jitteredY <- j.out$Y;
+
+# Creating the plot
+ggplot(plot.data) +
+    geom_tile(aes(x=X, y=Y, height=2*YWidth, width=2*XWidth, group=interaction(X, Y)),
+        summary.data, color='black', alpha=0, size=0.5) +
+    geom_point(aes(x=jitteredX, y=jitteredY), alpha=1, data=subset(plot.data, !SelectBy), color='#000000', size=1) +
+    geom_point(aes(x=jitteredX, y=jitteredY), alpha=1, data=subset(plot.data, SelectBy), color="#FF0000", size=1) +
+    labs(x="", y="cut", title="cut ") +
+    scale_x_discrete(drop=FALSE) +
+    scale_y_discrete(drop=FALSE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.text=element_text(size=9),
+        legend.title=element_text(size=11), legend.box='vertical',
+        axis.text.x=element_text(angle=90, size=10, hjust=1, vjust=0.5),
+        axis.text.y=element_text(size=10),
+        axis.title=element_text(size=12), title=element_text(size=12))
+
+################################################################################
+## Feature assay plot 1
+################################################################################
+
+plot.data <- data.frame(Y=assay(se, 1, withDimnames=FALSE)[1, ], row.names=colnames(se))
+plot.data$X <- colData(se)[, "price"];
+plot.data <- subset(plot.data, !is.na(X) & !is.na(Y));
+
+# Receiving point selection
+selected_pts <- rownames(lassoPoints(all_coordinates[['redDimPlot1']], all_lassos[['redDimPlot1']]));
+plot.data$SelectBy <- rownames(plot.data) %in% selected_pts;
+
+# Saving data for transmission
+all_coordinates[['featAssayPlot1']] <- plot.data
+
+# Creating the plot
+ggplot() +
+    geom_point(aes(x=X, y=Y), alpha=1, data=subset(plot.data, !SelectBy), color='#000000', size=1) +
+    geom_point(aes(x=X, y=Y), alpha=1, data=subset(plot.data, SelectBy), color="#FF0000", size=1) +
+    labs(x="price", y="x (logcounts)", title="x vs price") +
+    coord_cartesian(xlim=range(plot.data$X, na.rm=TRUE),
+        ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.box='vertical', legend.text=element_text(size=9), legend.title=element_text(size=11),
+            axis.text=element_text(size=10), axis.title=element_text(size=12), title=element_text(size=12))
+
+################################################################################
+## Heat map 1
+################################################################################
+
+value.mat <- as.matrix(assay(se, 1)[1:3, , drop=FALSE]);
+plot.data <- reshape2::melt(value.mat, varnames=c('Y', 'X'));
+
+plot.data[['OrderBy1']] <- colData(se)[['price']][match(plot.data$X, rownames(colData(se)))];
+plot.data <- dplyr::arrange(plot.data, OrderBy1);
+plot.data$X <- factor(plot.data$X, levels=unique(plot.data$X));
+
+# Centering and scaling
+plot.data$value <- plot.data$value - ave(plot.data$value, plot.data$Y);
+
+# Creating the heat map
+p0 <- ggplot(plot.data, aes(x=X, y=Y)) +
+    geom_raster(aes(fill=value)) +
+    labs(x='', y='') +
+    scale_fill_gradientn(colors=c('purple','purple','black','yellow','yellow'),
+                                values=c(0,0.0464265866683286,0.0973603727464271,0.182250016209925,1),
+                                    limits=c(-5.73452595476455,53.1654740452354), na.value='grey50') +
+    scale_y_discrete(expand=c(0, 0)) +
+    theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.line=element_blank());
+heatlegend <- cowplot::get_legend(p0 + theme(legend.position='bottom'));
+
+# Adding annotations
+legends <- list()
+
+p1 <- ggplot(plot.data, aes(x=X, y=1)) +
+    geom_raster(aes(fill=OrderBy1)) +
+    labs(x='', y='') +
+    scale_y_continuous(breaks=1, labels='price') +
+    scale_fill_gradientn(colors=colDataColorMap(colormap, 'price', discrete=FALSE)(21L), na.value='grey50', name='price') +
+    theme(axis.text.x=element_blank(), axis.ticks=element_blank(), axis.title.x=element_blank(),
+        rect=element_blank(), line=element_blank(), axis.title.y=element_blank(),
+        plot.margin=unit(c(0,0,-0.5,0), 'lines'));
+legends[[1]] <- cowplot::get_legend(p1 + theme(legend.position='bottom', plot.margin=unit(c(0,0,0,0), 'lines')));
+
+# Laying out the grid
+cowplot::plot_grid(
+      cowplot::plot_grid(
+          p1 + theme(legend.position='none'),
+        p0 + theme(legend.position='none'),
+          ncol=1, align='v', rel_heights=c(0.1, 1)),
+      heatlegend, ncol=1, rel_heights=c(0.9, 0.1))
+
+################################################################################
+## To guarantee the reproducibility of your code, you should also
+## record the output of sessionInfo()
+sessionInfo()
+```
+
+# Session info {-}
+
+Printing the session information
+
+```{r}
+sessionInfo()
+```
+
