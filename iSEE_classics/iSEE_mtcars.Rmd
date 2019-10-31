@@ -68,6 +68,12 @@ if(interactive()){
 }
 ```
 
+# Things you can do with this
+
+- add all continuous variables to the heatmap panel, and scale the features before clustering them
+- checkout relationships between categorical variables in the colData plot panel
+- do some classical scatter plots for mtcars like what you would do with base graphics, in a featureAssay plot (e.g. mpg vs disp, colored by cyl)
+- more & more :)
 
 ## Session info {-}
 
