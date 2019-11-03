@@ -52,13 +52,13 @@ download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE92nnn/GSE92332/suppl/GSE
 
 
 ```{r}
-Sys.setenv("VROOM_CONNECTION_SIZE" = "1300000")
-atlas_fulllength <- vroom::vroom("GSE92332_AtlasFullLength_TPM.txt.gz",delim = "\t")
-dim(atlas_fulllength)
-
-# atlas_fulllength <- read.delim("GSE92332_AtlasFullLength_TPM.txt.gz")
+# Sys.setenv("VROOM_CONNECTION_SIZE" = "1300000")
+# atlas_fulllength <- vroom::vroom("GSE92332_AtlasFullLength_TPM.txt.gz",delim = "\t")
 # dim(atlas_fulllength)
-# head(atlas_fulllength)
+
+atlas_fulllength <- read.delim("GSE92332_AtlasFullLength_TPM.txt.gz")
+dim(atlas_fulllength)
+head(atlas_fulllength)
 ```
 
 

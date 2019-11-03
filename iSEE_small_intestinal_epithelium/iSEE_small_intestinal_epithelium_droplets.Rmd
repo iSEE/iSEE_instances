@@ -53,8 +53,7 @@ download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE92nnn/GSE92332/suppl/GSE
 
 ```{r load_data}
 ## Reading UMI count data from file
-Sys.setenv("VROOM_CONNECTION_SIZE" = "1300000")
-atlas_umis <- vroom::vroom("GSE92332_atlas_UMIcounts.txt.gz",delim = "\t")
+atlas_umis <- read.delim("GSE92332_atlas_UMIcounts.txt.gz")
 dim(atlas_umis)
 ```
 
