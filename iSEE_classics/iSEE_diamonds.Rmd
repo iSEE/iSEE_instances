@@ -58,13 +58,21 @@ library(scater)
 
 
 ```{r cache=TRUE}
-sc_diamonds <- runPCA(sc_diamonds)
+set.seed(42)
+sc_diamonds <- runPCA(sc_diamonds, BSPARAM = ExactParam())
+set.seed(42)
 sc_diamonds <- runTSNE(sc_diamonds, dimred = "PCA")
+set.seed(42)
+sc_diamonds <- runUMAP(sc_diamonds, dimred = "PCA")
 ```
 
 ```{r}
 sc_diamonds
 colData(sc_diamonds)
+```
+
+```{r}
+saveRDS(sc_diamonds, "sc_diamonds.rds") 
 ```
 
 ```{r}
