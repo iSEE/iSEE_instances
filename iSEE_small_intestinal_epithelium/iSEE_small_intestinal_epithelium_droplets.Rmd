@@ -51,9 +51,10 @@ download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE92nnn/GSE92332/suppl/GSE
 ```
 
 
-```{r download_data, eval = FALSE}
+```{r load_data}
 ## Reading UMI count data from file
-atlas_umis <- read.delim("GSE92332_atlas_UMIcounts.txt.gz")
+Sys.setenv("VROOM_CONNECTION_SIZE" = "1300000")
+atlas_umis <- vroom::vroom("GSE92332_atlas_UMIcounts.txt.gz",delim = "\t")
 dim(atlas_umis)
 ```
 
@@ -143,7 +144,7 @@ plotTSNE(sce,colour_by="labels",text_by = "labels" )
 <!-- TODO: from matrix to sparse matrix? -->
 
 ```{r}
-saveRDS(sce, file = "sce_intestine_umi.rds")
+saveRDS(sce, file = "sce_intestine_umi.rds", compress = "xz")
 ```
 
 
