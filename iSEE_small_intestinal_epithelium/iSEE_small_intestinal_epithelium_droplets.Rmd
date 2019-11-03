@@ -1,0 +1,170 @@
+---
+title: "Code for generating an instance of iSEE for the data from Haber et al, 2017"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+**Compiled date**: `r Sys.Date()`
+
+**Last edited**: 2019-09-16
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  error = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+
+
+
+# Code for generating an instance of iSEE for the data from Haber et al, 2017
+
+Paper: https://www.ncbi.nlm.nih.gov/pubmed/29144463
+
+Data: The data reported in this article have been deposited in the Gene Expression Omnibus database (accession number GSE92332).
+
+Code through: https://github.com/adamh-broad/single_cell_intestine
+
+To avoid issues in using older versions of libraries and so, I'll follow in the next steps a concise version of what is recommended in the Workflow Simple Single Cell, as of Sep 2019
+
+
+Load UMI count data from GEO
+
+```{r download_data, eval = FALSE}
+## Downloading UMI count data
+download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE92nnn/GSE92332/suppl/GSE92332_atlas_UMIcounts.txt.gz", destfile="GSE92332_atlas_UMIcounts.txt.gz")
+```
+
+
+```{r download_data, eval = FALSE}
+## Reading UMI count data from file
+atlas_umis <- read.delim("GSE92332_atlas_UMIcounts.txt.gz")
+dim(atlas_umis)
+```
+
+```{r}
+library(SingleCellExperiment)
+library(iSEE)
+library(scran)
+library(scater)
+library(BiocSingular)
+
+head(atlas_umis)
+
+get_field <- function(string,field=1,delim="_", fixed=T) return(strsplit(string,delim, fixed=fixed)[[1]][field])
+
+batch.labels <- factor(unlist(lapply(colnames(atlas_umis), get_field, 1,"_")))
+table(batch.labels)
+
+annotation.labels <- factor(unlist(lapply(colnames(atlas_umis), get_field, 3,"_")))
+table(annotation.labels)
+
+barcodes <- factor(unlist(lapply(colnames(atlas_umis), get_field, 2,"_")))
+table(barcodes)
+table(table(barcodes))
+
+# corresponds as in the atlas from Single Cell Portal
+mycounts <- atlas_umis
+colnames(mycounts) <- paste0("cell_",seq_len(ncol(mycounts)))
+
+sce <- SingleCellExperiment(assays=list(counts=as.matrix(mycounts)))
+
+colData(sce) <- DataFrame(
+  labels = annotation.labels,
+  batch = batch.labels,
+  barcode = barcodes
+)
+
+sce <- logNormCounts(sce, exprs_values="counts")
+sce <- normalize(sce)
+```
+
+If we use uncorrected data, we would have something on this line
+
+```{r}
+sce_uncorrected <- sce
+sce_uncorrected <- runPCA(sce_uncorrected)
+set.seed(1000)
+sce_uncorrected <- runTSNE(sce_uncorrected, dimred="PCA", perplexity=30)
+plotTSNE(sce_uncorrected,colour_by="labels",text_by = "labels" )
+plotTSNE(sce_uncorrected,colour_by="batch",text_by = "batch" )
+```
+
+Therefore: we do batch correction - using limma's `removeBatchEffect`
+
+```{r}
+new.trend <- makeTechTrend(x=sce)
+
+fit <- trendVar(sce, use.spikes=FALSE, loess.args=list(span=0.05))
+plot(fit$mean, fit$var, pch=16)
+curve(fit$trend(x), col="dodgerblue", add=TRUE)
+curve(new.trend(x), col="red", add=TRUE)
+
+fit$trend <- new.trend # overwrite trend.
+dec <- decomposeVar(fit=fit) # use per-gene variance estimates in 'fit'.
+top.dec <- dec[order(dec$bio, decreasing=TRUE),] 
+head(top.dec)
+
+library(limma)
+assay(sce, "corrected") <- removeBatchEffect(logcounts(sce), batch=sce$batch)
+assayNames(sce)
+
+set.seed(1000)
+sce <- denoisePCA(sce, technical=new.trend, BSPARAM=IrlbaParam(), assay.type="corrected")
+ncol(reducedDim(sce, "PCA"))
+
+set.seed(1000)
+sce <- runTSNE(sce, dimred="PCA", perplexity=30)
+
+rowData(sce)$ave_count <- rowMeans(assay(sce, "counts"))
+rowData(sce)$n_cells <- rowSums(assay(sce, "counts") > 0)
+
+sce
+
+plotTSNE(sce,colour_by="batch",text_by = "batch" )
+plotTSNE(sce,colour_by="labels",text_by = "labels" )
+```
+
+<!-- TODO: from matrix to sparse matrix? -->
+
+```{r}
+saveRDS(sce, file = "sce_intestine_umi.rds")
+```
+
+
+
+## Session info {-}
+
+Printing the session information
+
+```{r}
+sessionInfo()
+```
+
+
+## Code for iSEE exploration
+
+This ~is~ will be just copy-pasted from a live session, to reproduce the session 1:1!
+
+```{r}
+library(iSEE)
+iSEE(sce)
+```
+
+
+
