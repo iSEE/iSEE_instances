@@ -1,0 +1,160 @@
+---
+title: "Code for generating an instance of iSEE for the data from Karow et al, 2018"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+**Compiled date**: `r Sys.Date()`
+
+**Last edited**: 2019-11-15
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  error = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+
+
+
+# Code for generating an instance of iSEE for the data from Karow et al 2018
+
+- https://www.ncbi.nlm.nih.gov/pubmed/29915193
+- https://www.nature.com/articles/s41593-018-0168-3
+- https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE113036
+
+SmartSeq:
+
+https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE113036&format=file&file=GSE113036%5Fdata%2Emaster%2Ecsv%2Egz
+
+Or from the manuscript: 41593_ ...
+
+10x data:
+
+https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE113036&format=file
+
+
+
+
+```{r}
+library(readr)
+mydf <- read.table("GSE113036_data.master.csv", sep = ",")
+# mydf <- readr::read_csv("GSE113036_data.master.csv")
+# myvr <- vroom::vroom("GSE113036_data.master.csv", delim = ",", col_names = TRUE)
+```
+
+```{r}
+dim(mydf)
+mydata <- t(mydf[, -c(1:7)])
+dim(mydata)
+coldata <- mydf[, c(1:7)]
+sample_ids <- rownames(mydf)
+```
+
+
+```{r}
+library(SingleCellExperiment)
+library(iSEE)
+library(scran)
+library(scater)
+library(BiocSingular)
+```
+
+These are already the FPKM normalized data!
+
+```{r}
+table(coldata$experiment)
+table(coldata$timepoint)
+table(coldata$assignment)
+hist(coldata$EGFP, breaks = 30)
+hist(coldata$Dsred, breaks = 30)
+hist(coldata$Ascl1_musMus, breaks = 30)
+hist(coldata$Sox2_musMus, breaks = 30)
+plot(coldata$Ascl1_musMus, coldata$Sox2_musMus)
+```
+
+
+```{r}
+sce <- SingleCellExperiment(assays=list(counts=as.matrix(mydata)))
+
+colData(sce) <- DataFrame(coldata)
+
+sce <- logNormCounts(sce, exprs_values="counts")
+sce <- normalize(sce)
+```
+
+
+```{r}
+new.trend <- makeTechTrend(x=sce)
+
+fit <- trendVar(sce, use.spikes=FALSE, loess.args=list(span=0.05))
+plot(fit$mean, fit$var, pch=16)
+curve(fit$trend(x), col="dodgerblue", add=TRUE)
+curve(new.trend(x), col="red", add=TRUE)
+
+fit$trend <- new.trend # overwrite trend.
+dec <- decomposeVar(fit=fit) # use per-gene variance estimates in 'fit'.
+top.dec <- dec[order(dec$bio, decreasing=TRUE),] 
+head(top.dec)
+
+# library(limma)
+# assay(sce, "corrected") <- removeBatchEffect(logcounts(sce), batch=sce$batch)
+# assayNames(sce)
+
+set.seed(1000)
+library(BiocSingular)
+sce <- denoisePCA(sce, technical=new.trend, BSPARAM=IrlbaParam())
+ncol(reducedDim(sce, "PCA"))
+set.seed(1000)
+sce <- runTSNE(sce, dimred="PCA", perplexity=30)
+
+rowData(sce)$ave_count <- rowMeans(assay(sce, "counts"))
+rowData(sce)$n_cells <- rowSums(assay(sce, "counts") > 0)
+
+sce
+
+plotTSNE(sce,colour_by="experiment",text_by = "experiment" )
+plotTSNE(sce,colour_by="assignment",text_by = "assignment" )
+plotTSNE(sce,colour_by="timepoint",text_by = "timepoint" )
+```
+
+```{r}
+saveRDS(sce, file = "sce_pericytes_c1.rds")
+```
+
+
+# Code for iSEE exploration
+
+This ~is~ will be just copy-pasted from a live session, to reproduce the session 1:1!
+
+```{r}
+sce_pericytes_c1 <- readRDS("sce_pericytes_c1.rds")
+library(iSEE)
+iSEE(sce_pericytes_c1)
+```
+
+
+# Session info {-}
+
+Printing the session information
+
+```{r}
+sessionInfo()
+```
+
+
