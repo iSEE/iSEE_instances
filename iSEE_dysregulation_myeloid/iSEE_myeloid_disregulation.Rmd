@@ -1,0 +1,803 @@
+
+# COVID-19 data, Schulte-Schrepping et al
+
+Toying around with...
+
+Schulte-Schrepping et al., 2020: Severe COVID-19 is marked by a dysregulated myeloid cell compartment
+
+
+Datasets retrieved from...
+https://beta.fastgenomics.org/datasets/
+
+
+# All the sets
+
+```{r}
+library(Seurat)
+library(iSEE)
+library(zellkonverter)
+
+seurat_c1_full_FG <- readRDS("seurat_COVID19_Neutrophils_cohort1_10x_jonas_FG_2020-08-19.rds")
+
+sce_from_seurat <- as.SingleCellExperiment(seurat_c1_full_FG)
+# meh, Seurat does not seem to like me too much... Will need to check more in detail
+# Error in value[[3L]](cond) : 
+#   invalid subscript 'e' in 'altExp(<SingleCellExperiment>, type="character", ...)':
+#   'RNA' not in 'altExpNames(<SingleCellExperiment>)'
+
+sce_rt <- readH5AD("neu_10x_processed_cellXgene.h5ad")
+
+sce_neu_rhapsody <- readH5AD("neu_rhapsody_processed_cellXgene.h5ad")
+
+
+sce_pbmcs_10x <-  readH5AD("pbmcs_10x_processed_cellXgene.h5ad")
+sce_pbmcs_rhapsody <-  readH5AD("pbmcs_rhapsody_processed_cellXgene.h5ad")
+
+sce_rt
+sce_neu_rhapsody
+
+iSEE(sce_rt)
+iSEE(sce_neu_rhapsody)
+```
+
+# Neutrophils, 10x
+
+"Remaking figure 5..."
+
+```{r}
+initial <- list()
+
+################################################################################
+# Settings for Reduced dimension plot 1
+################################################################################
+
+initial[["ReducedDimensionPlot1"]] <- new("ReducedDimensionPlot", Type = "X_umap", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "new.order", ColorByFeatureNameAssay = "X", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "AL627309.1", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "0", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "0", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(ReducedDimensionPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 2L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 2
+################################################################################
+
+initial[["ReducedDimensionPlot2"]] <- new("ReducedDimensionPlot", Type = "X_umap", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "RNA_snn_res.0.5", ColorByFeatureNameAssay = "X", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "AL627309.1", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "0", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.3, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "0", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 2L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "FeatureAssayPlot1", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Row data table 1
+################################################################################
+
+initial[["RowDataTable1"]] <- new("RowDataTable", Selected = "ELANE", Search = "ELA", SearchColumns = "", 
+    HiddenColumns = character(0), VersionInfo = list(iSEE = structure(list(
+        c(2L, 4L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = c(RowDataTable = 1L), PanelHeight = 500L, 
+    PanelWidth = 3L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
+    ColumnSelectionSource = "---", DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, 
+    ColumnSelectionDynamicSource = FALSE, RowSelectionRestrict = FALSE, 
+    ColumnSelectionRestrict = FALSE, SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 1
+################################################################################
+
+initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "X", XAxis = "Column data", XAxisColumnData = "RNA_snn_res.0.5", 
+    XAxisFeatureName = "AL627309.1", XAxisFeatureSource = "---", 
+    XAxisFeatureDynamicSource = FALSE, YAxisFeatureName = "ELANE", 
+    YAxisFeatureSource = "RowDataTable1", YAxisFeatureDynamicSource = FALSE, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "orig.ident", ColorByFeatureNameAssay = "X", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "None", ColorByDefaultColor = "#000000", ColorByFeatureName = "AL627309.1", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "0", ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(xmin = 4.2371404990651, 
+        xmax = 5.3462225987668, ymin = 0.87007632183904, ymax = 5.8373352128645, 
+        coords_css = list(xmin = 299.6875, xmax = 377.6875, ymin = 48L, 
+            ymax = 390L), coords_img = list(xmin = 599.375, xmax = 755.375, 
+            ymin = 96L, ymax = 780L), img_css_ratio = list(x = 2L, 
+            y = 2L), mapping = list(x = "X", y = "Y", group = "GroupBy"), 
+        domain = list(left = 0.4, right = 8.6, bottom = -0.29436182975769, 
+            top = 6.1815984249115, discrete_limits = list(x = list(
+                "0", "1", "2", "3", "4", "5", "6", "7"))), range = list(
+            left = 59.6548854880137, right = 1213.04109589041, 
+            bottom = 940.345114511986, top = 48.5943700124905), 
+        log = list(x = NULL, y = NULL), direction = "xy", brushId = "FeatureAssayPlot1_Brush", 
+        outputId = "FeatureAssayPlot1"), VisualBoxOpen = FALSE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "0", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(FeatureAssayPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Complex heatmap 2
+################################################################################
+
+initial[["ComplexHeatmapPlot2"]] <- new("ComplexHeatmapPlot", Assay = "X", CustomRows = TRUE, CustomRowsText = "ELANE\nMPO\nPADI4\nCD24\nBPI\nLCN2\nGSN\nARG1\nOLFM4\nANXA1", 
+    ClusterRows = FALSE, ClusterRowsDistance = "spearman", ClusterRowsMethod = "ward.D2", 
+    DataBoxOpen = FALSE, VisualChoices = "Annotations", ColumnData = "RNA_snn_res.0.5", 
+    RowData = character(0), CustomBounds = FALSE, LowerBound = NA_real_, 
+    UpperBound = NA_real_, AssayCenterRows = FALSE, AssayScaleRows = FALSE, 
+    DivergentColormap = "purple < black < yellow", ShowDimNames = "Rows", 
+    LegendPosition = "Bottom", LegendDirection = "Horizontal", 
+    VisualBoxOpen = FALSE, NamesRowFontSize = 10, NamesColumnFontSize = 10, 
+    ShowColumnSelection = TRUE, OrderColumnSelection = TRUE, 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 2L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 3
+################################################################################
+
+initial[["ReducedDimensionPlot3"]] <- new("ReducedDimensionPlot", Type = "X_umap", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "orig.ident", ColorByFeatureNameAssay = "X", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Feature name", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "ARG1", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "0", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "0", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 3L, PanelHeight = 500L, PanelWidth = 4L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+```
+
+```{r}
+## The following list of commands will generate the plots created in iSEE
+## Copy them into a script or an R session containing your SingleCellExperiment.
+## All commands below refer to your SingleCellExperiment object as `se`.
+
+se <- sce_rt
+colormap <- ExperimentColorMap()
+se <- iSEE::cleanDataset(se)
+colormap <- synchronizeAssays(colormap, se)
+all_contents <- list()
+
+################################################################################
+# Defining brushes
+################################################################################
+
+all_active <- list()
+all_active[['ReducedDimensionPlot1']] <- list()
+all_active[['ReducedDimensionPlot2']] <- list()
+all_active[['FeatureAssayPlot1']] <- list(xmin = 4.2371404990651, xmax = 5.3462225987668, ymin = 0.87007632183904, ymax = 5.8373352128645, 
+        coords_css = list(xmin = 299.6875, xmax = 377.6875, ymin = 48L, ymax = 390L), 
+        coords_img = list(xmin = 599.375, xmax = 755.375, ymin = 96L, ymax = 780L), img_css_ratio = list(
+            x = 2L, y = 2L), mapping = list(x = "X", y = "Y", group = "GroupBy"), domain = list(
+            left = 0.4, right = 8.6, bottom = -0.29436182975769, top = 6.1815984249115, 
+            discrete_limits = list(x = list("0", "1", "2", "3", "4", "5", "6", "7"))), 
+        range = list(left = 59.6548854880137, right = 1213.04109589041, bottom = 940.345114511986, 
+            top = 48.5943700124905), log = list(x = NULL, y = NULL), direction = "xy", 
+        brushId = "FeatureAssayPlot1_Brush", outputId = "FeatureAssayPlot1")
+all_active[['ReducedDimensionPlot3']] <- list()
+
+################################################################################
+## Reduced dimension plot 1
+################################################################################
+
+
+red.dim <- reducedDim(se, "X_umap");
+plot.data <- data.frame(X=red.dim[, 1], Y=red.dim[, 2], row.names=colnames(se));
+
+plot.data$ColorBy <- colData(se)[, "new.order"];
+
+# Avoid visual biases from default ordering by shuffling the points
+set.seed(3154);
+plot.data <- plot.data[sample(nrow(plot.data)),,drop=FALSE];
+
+dot.plot <- ggplot() +
+    geom_point(aes(x=X, y=Y, color=ColorBy), alpha=1, plot.data, size=1) +
+    labs(x="Dimension 1", y="Dimension 2", color="new.order", title="X_umap") +
+    coord_cartesian(xlim=range(plot.data$X, na.rm=TRUE),
+        ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_color_manual(values=colDataColorMap(colormap, "new.order", discrete=TRUE)(2), na.value='grey50', drop=FALSE) +
+    scale_fill_manual(values=colDataColorMap(colormap, "new.order", discrete=TRUE)(2), na.value='grey50', drop=FALSE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.box='vertical', legend.text=element_text(size=9), legend.title=element_text(size=11),
+            axis.text=element_text(size=10), axis.title=element_text(size=12), title=element_text(size=12))
+
+# Saving data for transmission
+all_contents[['ReducedDimensionPlot1']] <- plot.data
+
+################################################################################
+## Row data table 1
+################################################################################
+
+
+tab <- as.data.frame(rowData(se));
+
+# Saving data for transmission
+all_contents[['RowDataTable1']] <- tab
+
+################################################################################
+## Feature assay plot 1
+################################################################################
+
+
+plot.data <- data.frame(Y=assay(se, "X")["ELANE", ], row.names=colnames(se))
+plot.data$X <- colData(se)[, "RNA_snn_res.0.5"];
+
+plot.data$GroupBy <- plot.data$X;
+set.seed(100);
+plot.data$jitteredX <- iSEE::jitterViolinPoints(plot.data$X, plot.data$Y, 
+    width=0.4, varwidth=FALSE, adjust=1,
+    method='quasirandom', nbins=NULL);
+
+# Avoid visual biases from default ordering by shuffling the points
+set.seed(3154);
+plot.data <- plot.data[sample(nrow(plot.data)),,drop=FALSE];
+
+dot.plot <- ggplot() +
+    geom_violin(aes(x=X, y=Y, group=GroupBy), alpha=0.2, data=plot.data, scale='width', width=0.8) +
+    geom_point(aes(y=Y, x=jitteredX), alpha=1, plot.data, color='#000000', size=1) +
+    labs(x="RNA_snn_res.0.5", y="ELANE (X)", title="ELANE vs RNA_snn_res.0.5") +
+    coord_cartesian(ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_x_discrete(drop=FALSE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.text=element_text(size=9),
+            legend.title=element_text(size=11), legend.box='vertical',
+            axis.text.x=element_text(angle=90, size=10, hjust=1, vjust=0.5),
+            axis.text.y=element_text(size=10),
+            axis.title=element_text(size=12), title=element_text(size=12)) +
+    geom_rect(aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), color='#7BB854', alpha=0.25, fill='#E4F0DC',
+        data=do.call(data.frame, all_active[['FeatureAssayPlot1']][c('xmin', 'xmax', 'ymin', 'ymax')]),
+        inherit.aes=FALSE)
+
+# Saving data for transmission
+all_contents[['FeatureAssayPlot1']] <- plot.data
+
+################################################################################
+## Complex heatmap 2
+################################################################################
+
+
+.chosen.rows <- c("ELANE", "MPO", "PADI4", "CD24", "BPI", "LCN2", "GSN", "ARG1", "OLFM4", "ANXA1"
+    );
+.chosen.columns <- colnames(se);
+plot.data <- assay(se, "X")[.chosen.rows, .chosen.columns, drop=FALSE]
+plot.data <- as.matrix(plot.data);
+
+.assay_colors <- assayColorMap(colormap, "X", discrete=FALSE)(21L)
+.assay_colors <- circlize::colorRamp2(breaks = seq(0, 5.88723659515381, length.out = 21L), colors = .assay_colors)
+
+# Keep all samples to compute the full range of continuous annotations
+.column_data <- colData(se)[, "RNA_snn_res.0.5", drop=FALSE]
+.column_data[["Selected points"]] <- iSEE::multiSelectionToFactor(list(), colnames(se))
+
+.column_col <- list()
+
+.color_values <- .column_data[["RNA_snn_res.0.5"]]
+.color_values <- setdiff(unique(.color_values), NA)
+.col_colors <- colDataColorMap(colormap, "RNA_snn_res.0.5", discrete=TRUE)(length(.color_values))
+if (is.null(names(.col_colors))) names(.col_colors) <- levels(factor(.color_values))
+.column_col[["RNA_snn_res.0.5"]] <- .col_colors
+
+.column_col[["Selected points"]] <- iSEE::columnSelectionColorMap(colormap, levels(.column_data[["Selected points"]]))
+
+.column_data <- .column_data[colnames(plot.data), , drop=FALSE]
+.column_data <- as.data.frame(.column_data, optional=TRUE)
+.column_annot_order <- order(.column_data[["Selected points"]], .column_data[["RNA_snn_res.0.5"]])
+.column_data <- .column_data[.column_annot_order, , drop=FALSE]
+plot.data <- plot.data[, .column_annot_order, drop=FALSE]
+.column_annot <- ComplexHeatmap::columnAnnotation(df=.column_data, col=.column_col, annotation_legend_param=list(direction="horizontal"))
+
+hm <- ComplexHeatmap::Heatmap(matrix=plot.data, col=.assay_colors,
+    top_annotation=.column_annot, cluster_rows=FALSE, cluster_columns=FALSE,
+    name="X", show_row_names=TRUE, show_column_names=FALSE,
+    row_names_gp=grid::gpar(fontsize=10),
+    column_names_gp=grid::gpar(fontsize=10),
+    heatmap_legend_param=list(direction="horizontal"))
+
+ComplexHeatmap::draw(hm, heatmap_legend_side="bottom", annotation_legend_side="bottom")
+
+################################################################################
+## Reduced dimension plot 3
+################################################################################
+
+
+red.dim <- reducedDim(se, "X_umap");
+plot.data <- data.frame(X=red.dim[, 1], Y=red.dim[, 2], row.names=colnames(se));
+
+plot.data$ColorBy <- assay(se, "X")["ARG1", ];
+
+# Avoid visual biases from default ordering by shuffling the points
+set.seed(3154);
+plot.data <- plot.data[sample(nrow(plot.data)),,drop=FALSE];
+
+dot.plot <- ggplot() +
+    geom_point(aes(x=X, y=Y, color=ColorBy), alpha=1, plot.data, size=1) +
+    labs(x="Dimension 1", y="Dimension 2", color="ARG1\n(X)", title="X_umap") +
+    coord_cartesian(xlim=range(plot.data$X, na.rm=TRUE),
+        ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_color_gradientn(colors=assayColorMap(colormap, "X", discrete=FALSE)(21), na.value='grey50', limits=range(plot.data$ColorBy, na.rm=TRUE)) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.box='vertical', legend.text=element_text(size=9), legend.title=element_text(size=11),
+            axis.text=element_text(size=10), axis.title=element_text(size=12), title=element_text(size=12))
+
+# Saving data for transmission
+all_contents[['ReducedDimensionPlot3']] <- plot.data
+
+################################################################################
+## Reduced dimension plot 2
+################################################################################
+
+contents <- all_contents[['FeatureAssayPlot1']];
+col_selected <- list();
+select <- all_active[['FeatureAssayPlot1']];
+selected <- rownames(shiny::brushedPoints(contents, select));
+col_selected[["active"]] <- selected;
+
+red.dim <- reducedDim(se, "X_umap");
+plot.data <- data.frame(X=red.dim[, 1], Y=red.dim[, 2], row.names=colnames(se));
+
+plot.data$ColorBy <- colData(se)[, "RNA_snn_res.0.5"];
+
+# Receiving column point selection
+plot.data$SelectBy <- rownames(plot.data) %in% unlist(col_selected);
+
+# Avoid visual biases from default ordering by shuffling the points
+set.seed(3154);
+plot.data <- plot.data[sample(nrow(plot.data)),,drop=FALSE];
+
+dot.plot <- ggplot() +
+    geom_point(aes(x=X, y=Y, color=ColorBy), subset(plot.data, !SelectBy), alpha=0.30, size=1) +
+    geom_point(aes(x=X, y=Y, color=ColorBy), subset(plot.data, SelectBy), size=1) +
+    labs(x="Dimension 1", y="Dimension 2", color="RNA_snn_res.0.5", title="X_umap") +
+    coord_cartesian(xlim=range(plot.data$X, na.rm=TRUE),
+        ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_color_manual(values=colDataColorMap(colormap, "RNA_snn_res.0.5", discrete=TRUE)(8), na.value='grey50', drop=FALSE) +
+    scale_fill_manual(values=colDataColorMap(colormap, "RNA_snn_res.0.5", discrete=TRUE)(8), na.value='grey50', drop=FALSE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.box='vertical', legend.text=element_text(size=9), legend.title=element_text(size=11),
+            axis.text=element_text(size=10), axis.title=element_text(size=12), title=element_text(size=12))
+
+# Saving data for transmission
+all_contents[['ReducedDimensionPlot2']] <- plot.data
+
+################################################################################
+## To guarantee the reproducibility of your code, you should also
+## record the output of sessionInfo()
+sessionInfo()
+```
+
+# PBMCs, 10x
+
+```{r}
+initial <- list()
+
+################################################################################
+# Settings for Reduced dimension plot 1
+################################################################################
+
+initial[["ReducedDimensionPlot1"]] <- new("ReducedDimensionPlot", Type = "X_umap", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "RNA_snn_res.0.4", ColorByFeatureNameAssay = "X", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "AL627309.1", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "0", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.06, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "0", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(ReducedDimensionPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 2L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "FeatureAssayPlot1", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 2
+################################################################################
+
+initial[["ReducedDimensionPlot2"]] <- new("ReducedDimensionPlot", Type = "X_umap", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "group_per_sample", FacetColumnByColData = "group_per_sample", 
+    ColorByColumnData = "group_per_sample", ColorByFeatureNameAssay = "X", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "Column data", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "AL627309.1", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "0", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = c("Color", "Facet"), ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "0", FontSize = 1, LegendPointSize = 1, 
+    LegendPosition = "Bottom", HoverInfo = TRUE, LabelCenters = FALSE, 
+    LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 2L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 3
+################################################################################
+
+initial[["ReducedDimensionPlot3"]] <- new("ReducedDimensionPlot", Type = "X_umap", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "orig.ident", ColorByFeatureNameAssay = "X", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Feature name", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "VCAN", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "0", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "0", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 3L, PanelHeight = 500L, PanelWidth = 2L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Complex heatmap 1
+################################################################################
+
+initial[["ComplexHeatmapPlot1"]] <- new("ComplexHeatmapPlot", Assay = "X", CustomRows = TRUE, CustomRowsText = "VCAN\nMAFB\nPLBD1\nRNASE2\nIFI27\nIFITM3\nIFI6\nMT2A\nMX1", 
+    ClusterRows = FALSE, ClusterRowsDistance = "spearman", ClusterRowsMethod = "ward.D2", 
+    DataBoxOpen = FALSE, VisualChoices = "Annotations", ColumnData = "blueprint.labels", 
+    RowData = character(0), CustomBounds = FALSE, LowerBound = NA_real_, 
+    UpperBound = NA_real_, AssayCenterRows = FALSE, AssayScaleRows = FALSE, 
+    DivergentColormap = "purple < black < yellow", ShowDimNames = "Rows", 
+    LegendPosition = "Bottom", LegendDirection = "Horizontal", 
+    VisualBoxOpen = FALSE, NamesRowFontSize = 10, NamesColumnFontSize = 10, 
+    ShowColumnSelection = TRUE, OrderColumnSelection = TRUE, 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(ComplexHeatmapPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 2L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Row data table 1
+################################################################################
+
+initial[["RowDataTable1"]] <- new("RowDataTable", Selected = "CAMP", Search = "CAMP", SearchColumns = character(0), 
+    HiddenColumns = character(0), VersionInfo = list(iSEE = structure(list(
+        c(2L, 4L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = c(RowDataTable = 1L), PanelHeight = 500L, 
+    PanelWidth = 2L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
+    ColumnSelectionSource = "---", DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, 
+    ColumnSelectionDynamicSource = FALSE, RowSelectionRestrict = FALSE, 
+    ColumnSelectionRestrict = FALSE, SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 1
+################################################################################
+
+initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "X", XAxis = "Column data", XAxisColumnData = "cluster_labels_res.0.4", 
+    XAxisFeatureName = "AL627309.1", XAxisFeatureSource = "---", 
+    XAxisFeatureDynamicSource = FALSE, YAxisFeatureName = "CAMP", 
+    YAxisFeatureSource = "RowDataTable1", YAxisFeatureDynamicSource = FALSE, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "orig.ident", ColorByFeatureNameAssay = "X", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "None", ColorByDefaultColor = "#000000", ColorByFeatureName = "AL627309.1", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "0", ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(xmin = 13.533816011432, 
+        xmax = 14.426876658871, ymin = 1.4737488490535, ymax = 6.7307017107494, 
+        coords_css = list(xmin = 235.71875, xmax = 249.71875, 
+            ymin = 30L, ymax = 238L), coords_img = list(xmin = 471.4375, 
+            xmax = 499.4375, ymin = 60L, ymax = 476L), img_css_ratio = list(
+            x = 2L, y = 2L), mapping = list(x = "X", y = "Y", 
+            group = "GroupBy"), domain = list(left = 0.4, right = 23.6, 
+            bottom = -0.327373027801514, top = 6.87483358383179, 
+            discrete_limits = list(x = list("B cells_1", "B cells_2", 
+                "B cells_3", "CD4+ T cells_1", "CD4+ T cells_2", 
+                "CD4+ T cells_3", "CD8+ T cells_1", "CD8+ T cells_2", 
+                "CD8+ T cells_3", "CD163+ Monocytes (Sample ID1_d7)", 
+                "Classical Monocytes", "HLA-DR+ CD83+ Monocytes", 
+                "HLA-DR- S100A+ Monocytes", "Immature Neutrophils", 
+                "Megakaryocyte", "NK", "Neutrophils", "Non-classical Monocytes", 
+                "Plasmablasts", "mDCs", "mixed", "pDCs", "undefined"))), 
+        range = list(left = 59.6548854880137, right = 787.041095890411, 
+            bottom = 618.528708261986, top = 48.5943700124905), 
+        log = list(x = NULL, y = NULL), direction = "xy", brushId = "FeatureAssayPlot1_Brush", 
+        outputId = "FeatureAssayPlot1"), VisualBoxOpen = FALSE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "0", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 4L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(FeatureAssayPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 2L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+```
+
+```{r}
+## The following list of commands will generate the plots created in iSEE
+## Copy them into a script or an R session containing your SingleCellExperiment.
+## All commands below refer to your SingleCellExperiment object as `se`.
+
+se <- sce_pbmcs_10x
+colormap <- ExperimentColorMap()
+se <- iSEE::cleanDataset(se)
+colormap <- synchronizeAssays(colormap, se)
+all_contents <- list()
+
+################################################################################
+# Defining brushes
+################################################################################
+
+all_active <- list()
+all_active[['ReducedDimensionPlot1']] <- list()
+all_active[['ReducedDimensionPlot2']] <- list()
+all_active[['ReducedDimensionPlot3']] <- list()
+all_active[['FeatureAssayPlot1']] <- list()
+
+################################################################################
+## Reduced dimension plot 1
+################################################################################
+
+
+red.dim <- reducedDim(se, "X_umap");
+plot.data <- data.frame(X=red.dim[, 1], Y=red.dim[, 2], row.names=colnames(se));
+
+plot.data$ColorBy <- colData(se)[, "RNA_snn_res.0.4"];
+
+# Avoid visual biases from default ordering by shuffling the points
+set.seed(99049);
+plot.data <- plot.data[sample(nrow(plot.data)),,drop=FALSE];
+
+dot.plot <- ggplot() +
+    geom_point(aes(x=X, y=Y, color=ColorBy), alpha=1, plot.data, size=1) +
+    labs(x="Dimension 1", y="Dimension 2", color="RNA_snn_res.0.4", title="X_umap") +
+    coord_cartesian(xlim=range(plot.data$X, na.rm=TRUE),
+        ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_color_manual(values=colDataColorMap(colormap, "RNA_snn_res.0.4", discrete=TRUE)(23), na.value='grey50', drop=FALSE) +
+    scale_fill_manual(values=colDataColorMap(colormap, "RNA_snn_res.0.4", discrete=TRUE)(23), na.value='grey50', drop=FALSE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.box='vertical', legend.text=element_text(size=9), legend.title=element_text(size=11),
+            axis.text=element_text(size=10), axis.title=element_text(size=12), title=element_text(size=12))
+
+# Saving data for transmission
+all_contents[['ReducedDimensionPlot1']] <- plot.data
+
+################################################################################
+## Reduced dimension plot 2
+################################################################################
+
+
+red.dim <- reducedDim(se, "X_umap");
+plot.data <- data.frame(X=red.dim[, 1], Y=red.dim[, 2], row.names=colnames(se));
+
+plot.data$ColorBy <- colData(se)[, "group_per_sample"];
+
+plot.data$FacetColumn <- colData(se)[, "group_per_sample"];
+
+# Avoid visual biases from default ordering by shuffling the points
+set.seed(99049);
+plot.data <- plot.data[sample(nrow(plot.data)),,drop=FALSE];
+
+dot.plot <- ggplot() +
+    geom_point(aes(x=X, y=Y, color=ColorBy), alpha=1, plot.data, size=1) +
+    labs(x="Dimension 1", y="Dimension 2", color="group_per_sample", title="X_umap") +
+    coord_cartesian(xlim=range(plot.data$X, na.rm=TRUE),
+        ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_color_manual(values=colDataColorMap(colormap, "group_per_sample", discrete=TRUE)(3), na.value='grey50', drop=FALSE) +
+    scale_fill_manual(values=colDataColorMap(colormap, "group_per_sample", discrete=TRUE)(3), na.value='grey50', drop=FALSE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.box='vertical', legend.text=element_text(size=9), legend.title=element_text(size=11),
+            axis.text=element_text(size=10), axis.title=element_text(size=12), title=element_text(size=12)) +
+    facet_grid(. ~ FacetColumn)
+
+# Saving data for transmission
+all_contents[['ReducedDimensionPlot2']] <- plot.data
+
+################################################################################
+## Reduced dimension plot 3
+################################################################################
+
+
+red.dim <- reducedDim(se, "X_umap");
+plot.data <- data.frame(X=red.dim[, 1], Y=red.dim[, 2], row.names=colnames(se));
+
+plot.data$ColorBy <- assay(se, "X")["VCAN", ];
+
+# Avoid visual biases from default ordering by shuffling the points
+set.seed(99049);
+plot.data <- plot.data[sample(nrow(plot.data)),,drop=FALSE];
+
+dot.plot <- ggplot() +
+    geom_point(aes(x=X, y=Y, color=ColorBy), alpha=1, plot.data, size=1) +
+    labs(x="Dimension 1", y="Dimension 2", color="VCAN\n(X)", title="X_umap") +
+    coord_cartesian(xlim=range(plot.data$X, na.rm=TRUE),
+        ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_color_gradientn(colors=assayColorMap(colormap, "X", discrete=FALSE)(21), na.value='grey50', limits=range(plot.data$ColorBy, na.rm=TRUE)) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.box='vertical', legend.text=element_text(size=9), legend.title=element_text(size=11),
+            axis.text=element_text(size=10), axis.title=element_text(size=12), title=element_text(size=12))
+
+# Saving data for transmission
+all_contents[['ReducedDimensionPlot3']] <- plot.data
+
+################################################################################
+## Complex heatmap 1
+################################################################################
+
+
+.chosen.rows <- c("VCAN", "MAFB", "PLBD1", "RNASE2", "IFI27", "IFITM3", "IFI6", "MT2A", "MX1");
+.chosen.columns <- colnames(se);
+plot.data <- assay(se, "X")[.chosen.rows, .chosen.columns, drop=FALSE]
+plot.data <- as.matrix(plot.data);
+
+.assay_colors <- assayColorMap(colormap, "X", discrete=FALSE)(21L)
+.assay_colors <- circlize::colorRamp2(breaks = seq(0, 6.27999687194824, length.out = 21L), colors = .assay_colors)
+
+# Keep all samples to compute the full range of continuous annotations
+.column_data <- colData(se)[, "blueprint.labels", drop=FALSE]
+.column_data[["Selected points"]] <- iSEE::multiSelectionToFactor(list(), colnames(se))
+
+.column_col <- list()
+
+.color_values <- .column_data[["blueprint.labels"]]
+.color_values <- setdiff(unique(.color_values), NA)
+.col_colors <- colDataColorMap(colormap, "blueprint.labels", discrete=TRUE)(length(.color_values))
+if (is.null(names(.col_colors))) names(.col_colors) <- levels(factor(.color_values))
+.column_col[["blueprint.labels"]] <- .col_colors
+
+.column_col[["Selected points"]] <- iSEE::columnSelectionColorMap(colormap, levels(.column_data[["Selected points"]]))
+
+.column_data <- .column_data[colnames(plot.data), , drop=FALSE]
+.column_data <- as.data.frame(.column_data, optional=TRUE)
+.column_annot_order <- order(.column_data[["Selected points"]], .column_data[["blueprint.labels"]])
+.column_data <- .column_data[.column_annot_order, , drop=FALSE]
+plot.data <- plot.data[, .column_annot_order, drop=FALSE]
+.column_annot <- ComplexHeatmap::columnAnnotation(df=.column_data, col=.column_col, annotation_legend_param=list(direction="horizontal"))
+
+hm <- ComplexHeatmap::Heatmap(matrix=plot.data, col=.assay_colors,
+    top_annotation=.column_annot, cluster_rows=FALSE, cluster_columns=FALSE,
+    name="X", show_row_names=TRUE, show_column_names=FALSE,
+    row_names_gp=grid::gpar(fontsize=10),
+    column_names_gp=grid::gpar(fontsize=10),
+    heatmap_legend_param=list(direction="horizontal"))
+
+ComplexHeatmap::draw(hm, heatmap_legend_side="bottom", annotation_legend_side="bottom")
+
+################################################################################
+## Row data table 1
+################################################################################
+
+
+tab <- as.data.frame(rowData(se));
+
+# Saving data for transmission
+all_contents[['RowDataTable1']] <- tab
+
+################################################################################
+## Feature assay plot 1
+################################################################################
+
+
+plot.data <- data.frame(Y=assay(se, "X")["CAMP", ], row.names=colnames(se))
+plot.data$X <- colData(se)[, "cluster_labels_res.0.4"];
+
+plot.data$GroupBy <- plot.data$X;
+set.seed(100);
+plot.data$jitteredX <- iSEE::jitterViolinPoints(plot.data$X, plot.data$Y, 
+    width=0.4, varwidth=FALSE, adjust=1,
+    method='quasirandom', nbins=NULL);
+
+# Avoid visual biases from default ordering by shuffling the points
+set.seed(99049);
+plot.data <- plot.data[sample(nrow(plot.data)),,drop=FALSE];
+
+dot.plot <- ggplot() +
+    geom_violin(aes(x=X, y=Y, group=GroupBy), alpha=0.2, data=plot.data, scale='width', width=0.8) +
+    geom_point(aes(y=Y, x=jitteredX), alpha=1, plot.data, color='#000000', size=1) +
+    labs(x="cluster_labels_res.0.4", y="CAMP (X)", title="CAMP vs cluster_labels_res.0.4") +
+    coord_cartesian(ylim=range(plot.data$Y, na.rm=TRUE), expand=TRUE) +
+    scale_x_discrete(drop=FALSE) +
+    theme_bw() +
+    theme(legend.position='bottom', legend.text=element_text(size=9),
+            legend.title=element_text(size=11), legend.box='vertical',
+            axis.text.x=element_text(angle=90, size=10, hjust=1, vjust=0.5),
+            axis.text.y=element_text(size=10),
+            axis.title=element_text(size=12), title=element_text(size=12))
+
+# Saving data for transmission
+all_contents[['FeatureAssayPlot1']] <- plot.data
+
+################################################################################
+## To guarantee the reproducibility of your code, you should also
+## record the output of sessionInfo()
+sessionInfo()
+```
+
+
+
+
+
+
