@@ -245,7 +245,8 @@ initial[["ReducedDimensionPlot3"]] <- new("ReducedDimensionPlot", Type = "X_umap
 which leads to a call with...
 
 ```{r}
-iSEE(sce_rt, initial = initial)
+# if one wants to try out the voice command features...
+iSEE(sce_rt, initial = initial, voice = TRUE)
 ```
 
 
