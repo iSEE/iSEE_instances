@@ -241,6 +241,15 @@ initial[["ReducedDimensionPlot3"]] <- new("ReducedDimensionPlot", Type = "X_umap
 
 ```
 
+
+which leads to a call with...
+
+```{r}
+iSEE(sce_rt, initial = initial)
+```
+
+
+
 ```{r}
 ## The following list of commands will generate the plots created in iSEE
 ## Copy them into a script or an R session containing your SingleCellExperiment.
@@ -462,6 +471,12 @@ sessionInfo()
 # PBMCs, 10x
 
 ```{r}
+iSEE(sce_neu_rhapsody)
+```
+
+Again, doing something live, and then exporting the initial config
+
+```{r}
 initial <- list()
 
 ################################################################################
@@ -630,6 +645,15 @@ initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "X", XAxis = "
     RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
     SelectionHistory = list())
 ```
+
+
+which leads to a call with...
+
+```{r}
+iSEE(sce_neu_rhapsody, initial = initial)
+```
+
+
 
 ```{r}
 ## The following list of commands will generate the plots created in iSEE
