@@ -16,7 +16,11 @@ https://beta.fastgenomics.org/datasets/
 library(Seurat)
 library(iSEE)
 library(zellkonverter)
+```
 
+Trying first with a Seurat object - warning, these are all quite very large...
+
+```{r}
 seurat_c1_full_FG <- readRDS("seurat_COVID19_Neutrophils_cohort1_10x_jonas_FG_2020-08-19.rds")
 
 sce_from_seurat <- as.SingleCellExperiment(seurat_c1_full_FG)
@@ -24,23 +28,54 @@ sce_from_seurat <- as.SingleCellExperiment(seurat_c1_full_FG)
 # Error in value[[3L]](cond) : 
 #   invalid subscript 'e' in 'altExp(<SingleCellExperiment>, type="character", ...)':
 #   'RNA' not in 'altExpNames(<SingleCellExperiment>)'
+```
 
+A possibility: drop the HTOsPool1-6?
+
+```{r}
+pryr::object_size(seurat_c1_full_FG)
+seurat_c1_full_FG[["HTOsPool1"]] <- NULL
+seurat_c1_full_FG[["HTOsPool2"]] <- NULL
+seurat_c1_full_FG[["HTOsPool3"]] <- NULL
+seurat_c1_full_FG[["HTOsPool4"]] <- NULL
+seurat_c1_full_FG[["HTOsPool5"]] <- NULL
+seurat_c1_full_FG[["HTOsPool6"]] <- NULL
+pryr::object_size(seurat_c1_full_FG)
+
+# Ok, not too much difference...
+```
+
+
+Reading 
+
+```{r}
 sce_rt <- readH5AD("neu_10x_processed_cellXgene.h5ad")
 
 sce_neu_rhapsody <- readH5AD("neu_rhapsody_processed_cellXgene.h5ad")
 
-
 sce_pbmcs_10x <-  readH5AD("pbmcs_10x_processed_cellXgene.h5ad")
-sce_pbmcs_rhapsody <-  readH5AD("pbmcs_rhapsody_processed_cellXgene.h5ad")
+
+sce_pbmcs_rhapsody <-  readH5AD("pbmc_rhapsody_processed_cellXgene.h5ad")
 
 sce_rt
 sce_neu_rhapsody
+sce_pbmcs_10x
+sce_pbmcs_rhapsody
 
-iSEE(sce_rt)
-iSEE(sce_neu_rhapsody)
+pryr::object_size(sce_rt)
+pryr::object_size(sce_neu_rhapsody)
+pryr::object_size(sce_pbmcs_10x)
+pryr::object_size(sce_pbmcs_rhapsody)
+
+
+
 ```
 
 # Neutrophils, 10x
+
+```{r}
+iSEE(sce_rt)
+```
 
 "Remaking figure 5..."
 
