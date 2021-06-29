@@ -490,3 +490,108 @@ saveRDS(sce, file = "sce_seurat_thyroid.rds")
 sce_seurat_thyroid <- readRDS("~/Development/iSEE_instances/iSEE_thyroid_organoid/sce_seurat_thyroid.rds")
 ```
 
+
+```{r}
+initial <- list()
+
+################################################################################
+# Settings for Reduced dimension plot 1
+################################################################################
+
+initial[["ReducedDimensionPlot1"]] <- new("ReducedDimensionPlot", Type = "UMAP", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "orig.ident", ColorByFeatureNameAssay = "sctcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Feature name", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "Tg", ColorByFeatureSource = "RowDataTable1", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "AAACCCAAGCCTATCA-1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "AAACCCAAGCCTATCA-1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "orig.ident", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 5L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = c(ReducedDimensionPlot = 1L), PanelHeight = 500L, 
+    PanelWidth = 3L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
+    ColumnSelectionSource = "---", DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, 
+    ColumnSelectionDynamicSource = FALSE, RowSelectionRestrict = FALSE, 
+    ColumnSelectionRestrict = FALSE, SelectionHistory = list())
+
+################################################################################
+# Settings for Row data table 1
+################################################################################
+
+initial[["RowDataTable1"]] <- new("RowDataTable", Selected = "Tg", Search = "Tg", SearchColumns = c("", 
+"", ""), HiddenColumns = character(0), VersionInfo = list(iSEE = structure(list(
+    c(2L, 5L, 0L)), class = c("package_version", "numeric_version"
+))), PanelId = c(RowDataTable = 1L), PanelHeight = 500L, PanelWidth = 3L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 1
+################################################################################
+
+initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "sctcounts", XAxis = "Column data", 
+    XAxisColumnData = "cluster", XAxisFeatureName = "Xkr4", XAxisFeatureSource = "---", 
+    XAxisFeatureDynamicSource = FALSE, YAxisFeatureName = "Tg", 
+    YAxisFeatureSource = "RowDataTable1", YAxisFeatureDynamicSource = FALSE, 
+    FacetRowByColData = "orig.ident", FacetColumnByColData = "orig.ident", 
+    ColorByColumnData = "orig.ident", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "orig.ident", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "None", ColorByDefaultColor = "#000000", ColorByFeatureName = "Xkr4", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "AAACCCAAGCCTATCA-1", ColorBySampleSource = "---", 
+    ColorBySampleDynamicSource = FALSE, ShapeBy = "None", SizeBy = "None", 
+    SelectionAlpha = 0.1, ZoomData = numeric(0), BrushData = list(), 
+    VisualBoxOpen = FALSE, VisualChoices = "Color", ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "AAACCCAAGCCTATCA-1", FontSize = 1, LegendPointSize = 1, 
+    LegendPosition = "Bottom", HoverInfo = TRUE, LabelCenters = FALSE, 
+    LabelCentersBy = "orig.ident", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 5L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(FeatureAssayPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Complex heatmap 1
+################################################################################
+
+initial[["ComplexHeatmapPlot1"]] <- new("ComplexHeatmapPlot", Assay = "sctcounts", CustomRows = TRUE, 
+    CustomRowsText = "Pax8\nTg\nActa2\nPou5f1\nSox2\nKrt5\nCol1a2\nPerp\nFcer1g\nFlt1\nPou3f3\n", 
+    ClusterRows = FALSE, ClusterRowsDistance = "spearman", ClusterRowsMethod = "ward.D2", 
+    DataBoxOpen = FALSE, VisualChoices = "Annotations", ColumnData = "cluster", 
+    RowData = character(0), CustomBounds = FALSE, LowerBound = NA_real_, 
+    UpperBound = NA_real_, AssayCenterRows = FALSE, AssayScaleRows = FALSE, 
+    DivergentColormap = "purple < black < yellow", ShowDimNames = "Rows", 
+    LegendPosition = "Bottom", LegendDirection = "Horizontal", 
+    VisualBoxOpen = FALSE, NamesRowFontSize = 10, NamesColumnFontSize = 10, 
+    ShowColumnSelection = TRUE, OrderColumnSelection = TRUE, 
+    VersionInfo = list(iSEE = structure(list(c(2L, 5L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(ComplexHeatmapPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+```
+
+```{r}
+iSEE(sce_seurat_thyroid, initial = initial, appTitle = "iSEE - Thyroid Maturation")
+```
+
+
+
