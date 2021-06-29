@@ -1,0 +1,45 @@
+---
+title: "Code for generating an instance of iSEE for the thyroid maturation dataset (Romitti et al. 2021)"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Retrieving the data
+
+Retrieving the datasets from the GEO repository
+
+```
+wget https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4987nnn/GSM4987904/suppl/GSM4987904%5Fbarcodes%2Etsv%2Egz -O GSM4987904/barcodes.tsv.gz
+wget https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4987nnn/GSM4987904/suppl/GSM4987904%5Ffeatures%2Etsv%2Egz -O GSM4987904/features.tsv.gz
+wget https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM4987nnn/GSM4987904/suppl/GSM4987904%5Fmatrix%2Emtx%2Egz -O GSM4987904/matrix.mtx.gz
+```
+
+
+```{r}
+library(SingleCellExperiment)
+library(iSEE)
+library(scater)
+library(scran)
+library(scuttle)
+library(DropletUtils)
+library(BiocSingular)
+library(batchelor)
+library(SingleR)
+library(celldex)
+library(scDblFinder)
+library(Matrix)
+library(bluster)
+library(dplyr)
+```
+
