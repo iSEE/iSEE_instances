@@ -397,3 +397,96 @@ Save the cell information for mature and immature thyrocyte:
 **Switch to Scanpy here**
 
 ...
+
+
+# Entering the SingleCellExperiment universe!
+
+Trying first with some existing functions...
+
+```{r}
+MmThyroid.sce <- as.SingleCellExperiment(MmThyroid,assay = "SCT")
+
+sceasy::convertFormat(MmThyroid, from="seurat", to="anndata",
+                       outFile='MmThyroid.h5ad')
+
+iSEE(MmThyroid.sce)
+```
+
+Proceeding somewhat in a more manual way, where more control is ensured.
+
+```{r}
+x <- MmThyroid
+
+assay <- Assays(object = x)
+
+experiments <- list()
+for (assayn in assay) {
+  assays = list(counts = GetAssayData(object = x, 
+                                      assay = assayn, 
+                                      slot = "counts"), 
+                logcounts = GetAssayData(object = x, 
+                                         assay = assayn, 
+                                         slot = "data"))
+  assays <- assays[sapply(X = assays, FUN = nrow) != 0]
+  sume <- SummarizedExperiment::SummarizedExperiment(assays = assays)
+  experiments[[assayn]] <- sume
+}
+sce <- as(object = experiments[[1]], Class = "SingleCellExperiment")
+sce <- SingleCellExperiment::SingleCellExperiment(sce, altExps = experiments)
+orig.exp.name <- names(x = experiments[1])
+
+sce <- SingleCellExperiment::swapAltExp(x = sce, name = orig.exp.name, 
+                                        saved = NULL)
+
+metadata <- x[[]]
+metadata$ident <- Idents(object = x)
+SummarizedExperiment::colData(x = sce) <- S4Vectors::DataFrame(metadata)
+
+sce <- sce[rownames(sce) %in% rownames(experiments$SCT)]
+
+assays(sce)[["sctcounts"]] <- assays(experiments$SCT)[["logcounts"]]
+
+# for (assayn in assay) {
+#     sce <- SingleCellExperiment::swapAltExp(x = sce, name = assayn,
+#         saved = orig.exp.name)
+#     SummarizedExperiment::rowData(x = sce) <- S4Vectors::DataFrame(x[[assayn]][[]])
+#     sce <- SingleCellExperiment::swapAltExp(x = sce, name = orig.exp.name,
+#         saved = assayn)
+# }
+
+for (dr in Seurat:::FilterObjects(object = x, classes.keep = "DimReduc")) {
+  assay.used <- DefaultAssay(object = x[[dr]])
+  # if (assay.used %in% SingleCellExperiment::altExpNames(x = sce)) {
+    # sce <- SingleCellExperiment::swapAltExp(x = sce, 
+                                            # name = assay.used, saved = orig.exp.name)
+  SingleCellExperiment::reducedDim(x = sce, toupper(x = dr)) <- Embeddings(object = x[[dr]])
+  # sce <- SingleCellExperiment::swapAltExp(x = sce, 
+                                            # name = orig.exp.name, saved = assay.used)
+  # }
+}
+
+rowData(sce)$gene_name <- rownames(sce)
+rowData(sce)$chr_loc <- mapIds(ens.mm.v102, keys=rownames(sce),
+                  keytype="GENENAME", column="SEQNAME")
+
+rowData(sce)$gene_id <- mapIds(ens.mm.v102, keys=rownames(sce),
+                  keytype="GENENAME", column="GENEID")
+
+    
+    # reducedDim(sce, "PCA") <- Embeddings(object = x[["pca"]]) 
+    # reducedDim(sce, "UMAP") <- Embeddings(object = x[["umap"]])
+    
+    
+    # sce <- SingleCellExperiment::swapAltExp(x = sce, name = orig.exp.name, 
+        # saved = NULL)
+    # return(sce)
+
+saveRDS(sce, file = "sce_seurat_thyroid.rds")
+```
+
+# Finally iSEE!
+
+```{r}
+sce_seurat_thyroid <- readRDS("~/Development/iSEE_instances/iSEE_thyroid_organoid/sce_seurat_thyroid.rds")
+```
+
