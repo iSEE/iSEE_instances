@@ -169,3 +169,231 @@ cowplot::plot_grid(
 
 sce_diy <- sce
 ```
+
+# Following the workflow from the authors
+
+... as available in https://github.com/selifeski/mouse-thyroid-invitro
+
+```{r}
+# Load the data
+library("Seurat")
+rawdata <- Read10X(data.dir = "GSM4987904/")
+MmThyroid <- CreateSeuratObject(counts = rawdata,
+                                project = "thyroid_data",
+                                min.cells = 3, min.features = 200, 
+                                names.field = 2, names.delim = "-")
+MmThyroid
+```
+
+**Quality Control**
+
+Some information about mitochondrial genes, which are important for quality control.
+
+```{r}
+MmThyroid[["percent.mt"]] <- PercentageFeatureSet(MmThyroid, pattern = "^mt-")
+```
+
+A violin plot of some of the computed quality measures:
+
+  - the number of genes expressed in the count matrix
+  - the total counts per cell
+  - the percentage of counts in mitochondrial genes
+
+```{r}
+VlnPlot(MmThyroid, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3,
+        pt.size = 0, group.by = "orig.ident")
+```
+
+Remove cells that have high mitochondrial gene percentage or too many/too low total counts.
+
+```{r}
+MmThyroid <- subset(MmThyroid, subset = nFeature_RNA > 800 & nFeature_RNA < 5000
+                    & percent.mt < 20 & nCount_RNA > 2000 & nCount_RNA < 20000)
+```
+
+**After filtration**
+
+```{r}
+VlnPlot(MmThyroid, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3,
+        pt.size = 0, group.by = "orig.ident")
+```
+
+**Function to convert human genes to mouse**
+
+```{r echo=T, results='hide', message=FALSE, warning=FALSE}
+library(biomaRt)
+human = useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+mouse = useMart("ensembl", dataset = "mmusculus_gene_ensembl")
+human2ms <- function(human.genes){
+  genesV2 = getLDS(attributes = c("hgnc_symbol"), 
+                   filters = "hgnc_symbol", 
+                   values = human.genes, 
+                   mart = human, 
+                   attributesL = c("mgi_symbol"), 
+                   martL = mouse, uniqueRows=F)
+}
+```
+
+**Convert human cell cycle genes from Seurat to mouse orthologs**
+
+```{r echo=T, message=FALSE, warning=FALSE}
+## Convert cc genes of seurat to mouse
+# cc.genes.updated.2019
+cc.genes.updated.2019_ms <- NULL
+hs2ms_s.genes = human2ms(cc.genes.updated.2019$s.genes)
+cc.genes.updated.2019_ms$s.genes <- unique(hs2ms_s.genes[, 2])
+hs2ms_g2m.genes = human2ms(cc.genes.updated.2019$g2m.genes)
+cc.genes.updated.2019_ms$g2m.genes <- unique(hs2ms_g2m.genes[, 2])
+cc.genes.updated.2019_ms
+```
+
+**Cell cycle scoring**
+
+```{r echo=T, results='hide',message=FALSE, warning=FALSE}
+MmThyroid <- CellCycleScoring(MmThyroid, s.features = cc.genes.updated.2019_ms$s.genes,
+                              g2m.features = cc.genes.updated.2019_ms$g2m.genes)
+```
+
+**Normalizing the data**
+
+Total count normalize and logaritmize the data. And identify highly variable genes. 2,000 features were selected for downstream PCA.
+
+```{r echo=T, results='hide', message=FALSE, warning=FALSE}
+MmThyroid <- SCTransform(MmThyroid,
+                         vars.to.regress = c("nCount_RNA","percent.mt","S.Score", "G2M.Score"),
+                         variable.features.n = 2000)
+```
+
+
+## Dimensional Reduction
+
+Reduce the dimensionality of the data. 
+
+```{r echo=T, results='hide'}
+MmThyroid <- RunPCA(MmThyroid, features = VariableFeatures(object = MmThyroid))
+```
+
+The contribution of single PCs to the total variance in the data. This gives us information about how many PCs we should consider in order to compute the neighborhood relations of cells. Here I chose to use the first 10 PCs based on the variety of clusters.
+
+```{r}
+# Determine the dimensionality of the dataset
+ElbowPlot(MmThyroid, ndims=30)
+dims.use = 1:10
+```
+
+```{r echo=T, results='hide', message=FALSE, warning=FALSE}
+# Run non-linear dimensional reduction
+MmThyroid <- RunUMAP(MmThyroid, dims = dims.use)
+# Cluster the cells
+MmThyroid <- FindNeighbors(MmThyroid, dims = dims.use)
+MmThyroid <- FindClusters(MmThyroid, resolution = 0.7)
+```
+
+**Visualize the clusters**
+
+```{r}
+DimPlot(MmThyroid, reduction = "umap", pt.size = 1, label = F, label.size = 6)
+```
+
+## Transfer cell types, umap coordinates and leiden clusters from scanpy
+
+```{r}
+metadata <- read.csv('https://raw.githubusercontent.com/selifeski/mouse-thyroid-invitro/master/files/metadata.csv', row.names = 1)
+```
+
+**Transfer cell types**
+
+```{r}
+cells <- rownames(metadata)
+cell_types <- metadata$cells
+MmThyroid <- subset(MmThyroid, cells = cells)
+MmThyroid <- AddMetaData(object = MmThyroid, metadata = cell_types, col.name = 'cells')
+Idents(MmThyroid) <- MmThyroid$cells
+```
+
+**Transfer leiden clusters**
+
+```{r}
+leiden_clusters = metadata$leiden
+MmThyroid <- AddMetaData(object = MmThyroid, metadata = leiden_clusters, col.name = 'leiden')
+```
+
+**Transfer UMAP coordinates**
+
+```{r}
+umap_1 = metadata$X_umap.0
+umap_2 = metadata$X_umap.1
+MmThyroid <- AddMetaData(object = MmThyroid, metadata = umap_1, col.name = 'UMAP_1')
+MmThyroid <- AddMetaData(object = MmThyroid, metadata = umap_2, col.name = 'UMAP_2')
+MmThyroid@reductions$umap@cell.embeddings[,1] <- MmThyroid@meta.data$UMAP_1
+MmThyroid@reductions$umap@cell.embeddings[,2] <- MmThyroid@meta.data$UMAP_2
+```
+
+**Visualize the final plot**
+```{r}
+DimPlot(MmThyroid, reduction = "umap", pt.size = 1, label = F, label.size = 6, group.by = c("cells"))
+```
+
+## Selecting mature and immature thyrocytes
+
+**Mature cells expressing Slc5a5 and Tpo:**
+```{r}
+mature.cells <- which((as.numeric(MmThyroid@assays$SCT@data["Slc5a5",]) > 0.5 |
+                         as.numeric(MmThyroid@assays$SCT@data["Tpo",]) > 0.5) &
+                        (as.factor(MmThyroid@meta.data$cells) == 'Thyrocytes' |
+                           as.factor(MmThyroid@meta.data$cells) == 'Dox-responsive cluster'))
+```
+
+**Immature cells expressing Tg, Slc5a5 and Tpo:**
+
+```{r}
+inter.cells <- which((as.numeric(MmThyroid@assays$SCT@data["Tg",]) >0.5 |
+                       as.numeric(MmThyroid@assays$SCT@data["Slc5a5",]) > 0.5 |
+                       as.numeric(MmThyroid@assays$SCT@data["Tpo",]) > 0.5) &
+                       (as.factor(MmThyroid@meta.data$cells) == 'Thyrocytes' |
+                          as.factor(MmThyroid@meta.data$cells) == 'Dox-responsive cluster'))
+```
+
+**Cells express early thyrocyte lineage markers: Nkx2-1, Pax8, Foxe1 and Hhex:**
+
+```{r}
+early.cells <- which((as.numeric(MmThyroid@assays$SCT@data["Nkx2-1",]) > 0.5 |
+                       as.numeric(MmThyroid@assays$SCT@data["Pax8",]) > 0.5 |
+                       as.numeric(MmThyroid@assays$SCT@data["Foxe1",]) > 0.5 |
+                       as.numeric(MmThyroid@assays$SCT@data["Hhex",]) > 0.5 ) &
+                       (as.factor(MmThyroid@meta.data$cells) == 'Thyrocytes' |
+                          as.factor(MmThyroid@meta.data$cells) == 'Dox-responsive cluster'))
+```
+
+**Grouping mesodermal and fibroblast cells:**
+
+```{r}
+mes.cells <- which(as.factor(MmThyroid@meta.data$cells) == "Mesoderm" |
+                     as.factor(MmThyroid@meta.data$cells) == "Fibroblasts")
+```
+
+**Adding cluster information to metadata:**
+
+```{r}
+MmThyroid@meta.data$cluster <- "Others"
+MmThyroid@meta.data$cluster[mes.cells] <- "Mesoderm/Fibroblast"
+MmThyroid@meta.data$cluster[early.cells] <- "Dox-responsive cluster"
+MmThyroid@meta.data$cluster[inter.cells] <- "Immature Thyrocytes"
+MmThyroid@meta.data$cluster[mature.cells] <- "Mature Thyrocytes"
+```
+
+**Visualize the cluster:**
+
+```{r}
+DimPlot(MmThyroid, group.by = "cluster", label = TRUE, repel = TRUE, pt.size = 1)+ NoLegend()
+```
+
+Save the cell information for mature and immature thyrocyte:
+
+```{r}
+# write.csv(MmThyroid@meta.data['cluster'], 'Mature_immature_early_thyrocytes.csv')
+```
+
+**Switch to Scanpy here**
+
+...
