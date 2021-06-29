@@ -43,3 +43,129 @@ library(bluster)
 library(dplyr)
 ```
 
+
+# Going DIY first
+
+```{r}
+sce <- read10xCounts("GSM4987904")
+
+sce
+
+sce$sample_id <- "GSM4987904"
+
+pryr::object_size(sce)
+
+rowData(sce)
+head(rownames(sce))
+rownames(sce) <- uniquifyFeatureNames(rowData(sce)$ID, rowData(sce)$Symbol)
+head(rownames(sce))
+
+library(AnnotationHub)
+ah <- AnnotationHub()
+query(ah, c("musculus", "Ensembl", "EnsDb"))
+ens.mm.v102 <- ah[["AH89211"]]
+genes(ens.mm.v102)[,2]
+
+is.mito <- grepl("^mt-", rownames(sce))
+
+chr.loc <- mapIds(ens.mm.v102, keys=rownames(sce),
+                  keytype="GENENAME", column="SEQNAME")
+is.mito <- which(chr.loc=="MT")
+
+ref_annot_immgen <- ImmGenData()
+# ref_annot_novershtern <- NovershternHematopoieticData()
+# ref_annot_dice <- DatabaseImmuneCellExpressionData()
+# ref_annot_monaco <- MonacoImmuneData()
+# ref_annot_mouse <- MouseRNAseqData()
+# ref_annot_encode <- BlueprintEncodeData()
+
+rowData(sce)$location <- chr.loc
+
+sce <- addPerFeatureQC(sce)
+
+rowData(sce)
+
+sce <- addPerCellQC(sce, subsets=list(Mito=is.mito))
+qcstats <- perCellQCMetrics(sce, subsets=list(Mito=is.mito))
+filtered <- quickPerCellQC(qcstats, percent_subsets="subsets_Mito_percent")
+filtered
+colSums(as.data.frame(filtered))
+table(filtered$low_n_features, filtered$high_subsets_Mito_percent)
+
+sce$discard <- filtered$discard
+
+plotColData(sce, y="subsets_Mito_percent", colour_by="discard")
+plotColData(sce, y="sum", colour_by="discard")
+plotColData(sce, y="detected", colour_by="discard")
+
+plotColData(sce, x="sum", y="subsets_Mito_percent", colour_by="discard")
+plotColData(sce, x="detected", y="subsets_Mito_percent", colour_by="discard")
+
+sce <- sce[, !(filtered$discard | sce$subsets_Mito_percent > 50)]
+sce
+
+clusters <- scran::quickCluster(sce, min.size = 50)
+sce <- scran::computeSumFactors(sce, clusters=clusters)
+sce <- scater::logNormCounts(sce)
+
+dec <- scran::modelGeneVar(sce)
+hvgs <- scran::getTopHVGs(dec, prop = 0.1)
+
+set.seed(42)
+sce <- scater::runPCA(sce, subset_row=hvgs)
+
+clusters <- clusterRows(reducedDim(sce, "PCA"), NNGraphParam())
+
+sce <- scater::runTSNE(sce, dimred="PCA")
+sce <- scater::runUMAP(sce, dimred = 'PCA', external_neighbors=TRUE)
+
+snn.gr <- buildSNNGraph(sce, use.dimred="PCA", k=25)
+sce$cluster_round1 <- factor(igraph::cluster_louvain(snn.gr)$membership)
+
+plotTSNE(sce, colour_by="cluster_round1", text_by="cluster_round1")
+
+# Doublet detection
+sce <- scDblFinder(sce)
+table(sce$scDblFinder.class)
+
+plotTSNE(sce, colour_by="scDblFinder.score", text_by="cluster_round1")
+plotTSNE(sce, colour_by="scDblFinder.class", text_by="cluster_round1")
+
+# cell type annotation, round one!
+pred_celltypes <- SingleR(test = sce, 
+                          ref = ref_annot_immgen, 
+                          labels = ref_annot_immgen$label.main,
+                          BPPARAM = BiocParallel::MulticoreParam(6))
+table(pred_celltypes$labels)
+sce$pred_celltypes <- pred_celltypes$labels
+plotTSNE(sce, colour_by= "pred_celltypes", text_by = "pred_celltypes")
+plotUMAP(sce, colour_by= "pred_celltypes", text_by = "pred_celltypes")
+
+# pred_celltypes_novershtern <- SingleR(test = sce, 
+#                                       ref = ref_annot_novershtern, 
+#                                       labels = ref_annot_novershtern$label.main,
+#                                       BPPARAM = BiocParallel::MulticoreParam(6))
+# table(pred_celltypes_novershtern$labels)
+# sce$pred_celltypes_novershtern <- pred_celltypes_novershtern$labels
+# plotTSNE(sce, colour_by= "pred_celltypes_novershtern", text_by = "pred_celltypes_novershtern")
+
+cowplot::plot_grid(
+  plotlist = list(
+    plotUMAP(sce, colour_by= "Pax8"),
+    plotUMAP(sce, colour_by= "Tg"),
+    plotUMAP(sce, colour_by= "Acta2"),
+    plotUMAP(sce, colour_by= "Pou5f1"),
+    plotUMAP(sce, colour_by= "Sox2"),
+    plotUMAP(sce, colour_by= "Pax6"),
+    plotUMAP(sce, colour_by= "Krt5"),
+    plotUMAP(sce, colour_by= "Col1a2"),
+    plotUMAP(sce, colour_by= "Perp"),
+    plotUMAP(sce, colour_by= "Fcer1g"),
+    plotUMAP(sce, colour_by= "Flt1"),
+    plotUMAP(sce, colour_by= "Pou3f3"),
+    plotUMAP(sce, colour_by= "Hand1")
+  )
+)
+
+sce_diy <- sce
+```
