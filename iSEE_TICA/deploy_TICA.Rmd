@@ -1,0 +1,138 @@
+---
+title: "Code for generating an instance of iSEE for the TICA"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# I have one minute to convince you
+
+Retrieving the datasets from the Zenodo archive
+
+https://zenodo.org/record/4263972#.X7BQJ9u1t25
+
+```
+wget -c https://zenodo.org/record/4263972/files/TICAtlas_downsampled_1000.h5ad?download=1
+```
+
+```{r}
+library("zellkonverter")
+sce_tica <- readH5AD("TICAtlas_downsampled_1000.h5ad")
+library("iSEE")
+iSEE(sce_tica)
+```
+
+
+
+# I have some more time to tell you the whole thing
+
+## Retrieving the data
+
+From the zenodo archive: https://zenodo.org/record/4263972#.X7BQJ9u1t25
+
+(This is from the preprint version, with a nice downsampled file in AnnData format :) )
+
+    TICAtlas.rds: an rds file containing a Seurat object with the whole Atlas (317111 cells, RNA and integrated assays, PCA and UMAP reductions)
+    TICAtlas.h5ad: an h5ad file with the whole Atlas (317111 cells, RNA assay, PCA and UMAP)
+    TICAtlas_RNA.rds: an rds file containing a Seurat object of the whole Atlas but only the RNA assay (317111 cells, UMAP embedding)
+    TICAtlas_downsampled_1000.rds: an rds file containing a downsampled version of the Seurat object of the whole Atlas (24834 cells, RNA and integrated assay, PCA  and UMAP reductions)
+    TICAtlas_downsampled_1000.h5ad: an rds file containing a downsampled version of the Seurat object of the whole Atlas (24834 cells, RNA assay, PCA  and UMAP reductions)
+    TICAtlas_metadata.csv: a comma-separated text file with the metadata for each of the cells
+
+```
+wget -c https://zenodo.org/record/4263972/files/TICAtlas_RNA.rds?download=1
+wget -c https://zenodo.org/record/4263972/files/TICAtlas_downsampled_1000.rds?download=1
+
+wget -c https://zenodo.org/record/4263972/files/TICAtlas.h5ad?download=1
+wget -c https://zenodo.org/record/4263972/files/TICAtlas_metadata.csv?download=1
+wget -c https://zenodo.org/record/4263972/files/TICAtlas_downsampled_1000.h5ad?download=1
+```
+
+Extra info: 
+https://github.com/Single-Cell-Genomics-Group-CNAG-CRG/Tumor-Immune-Cell-Atlas
+
+## Loading packages
+
+```{r}
+library("zellkonverter")
+sce_tica <- readH5AD("TICAtlas_downsampled_1000.h5ad")
+library("iSEE")
+library("iSEEu")
+
+iSEEu::modeEmpty(sce_tica)
+```
+
+To make the loading quickest (and independent of `zellkonverter`) do the following:
+
+```{r}
+sce_tica
+colData(sce_tica)
+colnames(sce_tica)
+
+reducedDimNames(sce_tica) <- "UMAP"
+assayNames(sce_tica) <- "logcounts"
+sce_tica
+
+HDF5Array::saveHDF5SummarizedExperiment(sce_tica, dir = "see_tica", replace = TRUE)
+sce <- HDF5Array::loadHDF5SummarizedExperiment("see_tica/")
+scater::plotUMAP(sce, colour_by="cell_type")
+
+# why are we even doing this?
+microbenchmark::microbenchmark({sce <- HDF5Array::loadHDF5SummarizedExperiment("see_tica/")}, times = 10)
+```
+
+
+## Configuring the app
+
+Go by hand first, then use this chunk of code to programmatically re-do it
+
+```{r}
+iSEEu::modeEmpty(sce)
+
+```
+
+
+## Figures figures figures
+
+Do some by hand, then extract the code
+
+```{r}
+
+```
+
+## Adding a tour to tell things to people - they like to hear or read about the data!
+
+```{r}
+
+```
+
+
+library(zellkonverter)
+
+sce_tica <- readH5AD("TICAtlas_downsampled_1000.h5ad")
+
+
+## Fully fledged instance of iSEE
+
+```{r}
+iSEE(sce, initial = initial, appTitle = "iSEE ❤️ TICA")
+```
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+
+
+
