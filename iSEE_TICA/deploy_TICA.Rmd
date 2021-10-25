@@ -375,12 +375,9 @@ Do some by hand, then extract the code
 ```
 
 
-library(zellkonverter)
-
-sce_tica <- readH5AD("TICAtlas_downsampled_1000.h5ad")
-
-
 ## Fully fledged instance of iSEE
+
+This is just it 💣 💣 💣 💣 💣 
 
 ```{r}
 iSEE(sce, initial = initial, appTitle = "iSEE ❤️ TICA")
