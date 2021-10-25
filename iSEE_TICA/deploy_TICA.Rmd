@@ -99,6 +99,264 @@ Go by hand first, then use this chunk of code to programmatically re-do it
 ```{r}
 iSEEu::modeEmpty(sce)
 
+initial <- list()
+
+################################################################################
+# Settings for Column data plot 1
+################################################################################
+
+initial[["ColumnDataPlot1"]] <- new("ColumnDataPlot", XAxis = "None", YAxis = "source", XAxisColumnData = "nCount_RNA", 
+    FacetRowByColData = "gender", FacetColumnByColData = "gender", 
+    ColorByColumnData = "nCount_RNA", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "gender", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "None", ColorByDefaultColor = "#000000", ColorByFeatureName = "TSPAN6", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "X121270372616437_1_1_1_1", ColorBySampleSource = "---", 
+    ColorBySampleDynamicSource = FALSE, ShapeBy = "None", SizeBy = "None", 
+    SelectionAlpha = 0.1, ZoomData = numeric(0), BrushData = list(), 
+    VisualBoxOpen = FALSE, VisualChoices = "Color", ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "X121270372616437_1_1_1_1", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "gender", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 5L, 2L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(ColumnDataPlot = 1L), PanelHeight = 500L, 
+    PanelWidth = 3L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
+    ColumnSelectionSource = "---", DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, 
+    ColumnSelectionDynamicSource = FALSE, RowSelectionRestrict = FALSE, 
+    ColumnSelectionRestrict = FALSE, SelectionHistory = list())
+
+################################################################################
+# Settings for Column data plot 2
+################################################################################
+
+initial[["ColumnDataPlot2"]] <- new("ColumnDataPlot", XAxis = "Column data", YAxis = "source", 
+    XAxisColumnData = "cell_type", FacetRowByColData = "gender", 
+    FacetColumnByColData = "gender", ColorByColumnData = "source", 
+    ColorByFeatureNameAssay = "logcounts", ColorBySampleNameColor = "#FF0000", 
+    ShapeByColumnData = "gender", SizeByColumnData = "nCount_RNA", 
+    FacetRowBy = "None", FacetColumnBy = "None", ColorBy = "Column data", 
+    ColorByDefaultColor = "#000000", ColorByFeatureName = "TSPAN6", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "X121270372616437_1_1_1_1", ColorBySampleSource = "---", 
+    ColorBySampleDynamicSource = FALSE, ShapeBy = "None", SizeBy = "None", 
+    SelectionAlpha = 0.1, ZoomData = numeric(0), BrushData = list(), 
+    VisualBoxOpen = TRUE, VisualChoices = "Color", ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "X121270372616437_1_1_1_1", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "gender", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 5L, 2L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 3L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 1
+################################################################################
+
+initial[["ReducedDimensionPlot1"]] <- new("ReducedDimensionPlot", Type = "UMAP", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "gender", FacetColumnByColData = "gender", 
+    ColorByColumnData = "cell_type", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "gender", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "TSPAN6", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "X121270372616437_1_1_1_1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "X121270372616437_1_1_1_1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "gender", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 5L, 2L)), class = c("package_version", "numeric_version"
+    ))), PanelId = c(ReducedDimensionPlot = 1L), PanelHeight = 500L, 
+    PanelWidth = 3L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
+    ColumnSelectionSource = "---", DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, 
+    ColumnSelectionDynamicSource = FALSE, RowSelectionRestrict = FALSE, 
+    ColumnSelectionRestrict = FALSE, SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 2
+################################################################################
+
+initial[["ReducedDimensionPlot2"]] <- new("ReducedDimensionPlot", Type = "UMAP", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "gender", FacetColumnByColData = "gender", 
+    ColorByColumnData = "subtype", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "gender", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "TSPAN6", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "X121270372616437_1_1_1_1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "X121270372616437_1_1_1_1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "gender", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 5L, 2L)), class = c("package_version", "numeric_version"
+    ))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Row data table 1
+################################################################################
+
+initial[["RowDataTable1"]] <- new("RowDataTable", Selected = "CD14", Search = "^CD1", SearchColumns = "", 
+    HiddenColumns = character(0), VersionInfo = list(iSEE = structure(list(
+        c(2L, 5L, 2L)), class = c("package_version", "numeric_version"
+    ))), PanelId = c(RowDataTable = 1L), PanelHeight = 500L, 
+    PanelWidth = 4L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
+    ColumnSelectionSource = "---", DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, 
+    ColumnSelectionDynamicSource = FALSE, RowSelectionRestrict = FALSE, 
+    ColumnSelectionRestrict = FALSE, SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 1
+################################################################################
+
+initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "logcounts", XAxis = "Column data", 
+    XAxisColumnData = "cell_type", XAxisFeatureName = "TSPAN6", 
+    XAxisFeatureSource = "---", XAxisFeatureDynamicSource = FALSE, 
+    YAxisFeatureName = "CD14", YAxisFeatureSource = "RowDataTable1", 
+    YAxisFeatureDynamicSource = FALSE, FacetRowByColData = "gender", 
+    FacetColumnByColData = "gender", ColorByColumnData = "nCount_RNA", 
+    ColorByFeatureNameAssay = "logcounts", ColorBySampleNameColor = "#FF0000", 
+    ShapeByColumnData = "gender", SizeByColumnData = "nCount_RNA", 
+    FacetRowBy = "None", FacetColumnBy = "None", ColorBy = "None", 
+    ColorByDefaultColor = "#000000", ColorByFeatureName = "TSPAN6", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "X121270372616437_1_1_1_1", ColorBySampleSource = "---", 
+    ColorBySampleDynamicSource = FALSE, ShapeBy = "None", SizeBy = "None", 
+    SelectionAlpha = 0.1, ZoomData = numeric(0), BrushData = list(), 
+    VisualBoxOpen = FALSE, VisualChoices = "Color", ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "X121270372616437_1_1_1_1", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "gender", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 5L, 2L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(FeatureAssayPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Complex heatmap 1
+################################################################################
+
+initial[["ComplexHeatmapPlot1"]] <- new("ComplexHeatmapPlot", Assay = "logcounts", CustomRows = TRUE, 
+    CustomRowsText = "MS4A1\nCD79A\nCD83\nCD79B\nTCL1A\nIGKC\nLTB\nTCF7\nFOXP3\nBATF\nCREM\nSTMN1\nTUBB\nTYMS\nMX1\nIFI44L\nIFI6\nPRF1\nGZMB\nC1QA\nC1QC\nIL1B\nTSPAN13\nTCF4\nIRF7\n", 
+    ClusterRows = TRUE, ClusterRowsDistance = "spearman", ClusterRowsMethod = "ward.D2", 
+    DataBoxOpen = FALSE, VisualChoices = "Annotations", ColumnData = "subtype", 
+    RowData = character(0), CustomBounds = FALSE, LowerBound = NA_real_, 
+    UpperBound = NA_real_, AssayCenterRows = FALSE, AssayScaleRows = FALSE, 
+    DivergentColormap = "purple < black < yellow", ShowDimNames = "Rows", 
+    LegendPosition = "Bottom", LegendDirection = "Horizontal", 
+    VisualBoxOpen = FALSE, NamesRowFontSize = 10, NamesColumnFontSize = 10, 
+    ShowColumnSelection = TRUE, OrderColumnSelection = TRUE, 
+    VersionInfo = list(iSEE = structure(list(c(2L, 5L, 2L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(ComplexHeatmapPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 3
+################################################################################
+
+initial[["ReducedDimensionPlot3"]] <- new("ReducedDimensionPlot", Type = "UMAP", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "gender", FacetColumnByColData = "gender", 
+    ColorByColumnData = "cluster_kmeans_k6", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "gender", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "TSPAN6", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "X121270372616437_1_1_1_1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "X121270372616437_1_1_1_1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "gender", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 5L, 2L)), class = c("package_version", "numeric_version"
+    ))), PanelId = 3L, PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 2
+################################################################################
+
+initial[["FeatureAssayPlot2"]] <- new("FeatureAssayPlot", Assay = "logcounts", XAxis = "Column data", 
+    XAxisColumnData = "cell_type", XAxisFeatureName = "TSPAN6", 
+    XAxisFeatureSource = "---", XAxisFeatureDynamicSource = FALSE, 
+    YAxisFeatureName = "C1QC", YAxisFeatureSource = "---", YAxisFeatureDynamicSource = FALSE, 
+    FacetRowByColData = "gender", FacetColumnByColData = "gender", 
+    ColorByColumnData = "nCount_RNA", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "gender", 
+    SizeByColumnData = "nCount_RNA", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "None", ColorByDefaultColor = "#000000", ColorByFeatureName = "TSPAN6", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "X121270372616437_1_1_1_1", ColorBySampleSource = "---", 
+    ColorBySampleDynamicSource = FALSE, ShapeBy = "None", SizeBy = "None", 
+    SelectionAlpha = 0.1, ZoomData = numeric(0), BrushData = list(), 
+    VisualBoxOpen = FALSE, VisualChoices = "Color", ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "X121270372616437_1_1_1_1", FontSize = 1, 
+    LegendPointSize = 1, LegendPosition = "Bottom", HoverInfo = TRUE, 
+    LabelCenters = FALSE, LabelCentersBy = "gender", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 5L, 2L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 4L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Complex heatmap 2
+################################################################################
+
+initial[["ComplexHeatmapPlot2"]] <- new("ComplexHeatmapPlot", Assay = "logcounts", CustomRows = TRUE, 
+    CustomRowsText = "LAG3\nPDCD1\nCTLA4\nC1QC\nSPP1", ClusterRows = FALSE, 
+    ClusterRowsDistance = "spearman", ClusterRowsMethod = "ward.D2", 
+    DataBoxOpen = FALSE, VisualChoices = "Annotations", ColumnData = "cluster_kmeans_k6", 
+    RowData = character(0), CustomBounds = FALSE, LowerBound = NA_real_, 
+    UpperBound = NA_real_, AssayCenterRows = FALSE, AssayScaleRows = FALSE, 
+    DivergentColormap = "purple < black < yellow", ShowDimNames = "Rows", 
+    LegendPosition = "Bottom", LegendDirection = "Horizontal", 
+    VisualBoxOpen = FALSE, NamesRowFontSize = 10, NamesColumnFontSize = 10, 
+    ShowColumnSelection = TRUE, OrderColumnSelection = TRUE, 
+    VersionInfo = list(iSEE = structure(list(c(2L, 5L, 2L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 4L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
 ```
 
 
