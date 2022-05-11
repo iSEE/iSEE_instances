@@ -1,0 +1,19 @@
+element;intro
+#Welcome;Welcome to the HCA Tonsil Data Atlas instance for the epithelial cells!
+#ReducedDimensionPlot1;We identified six clusters... 
+#ReducedDimensionPlot1_ColorBy;You can see that they are colored in the UMAP according to their annotated cell type
+#RowDataTable1;From this table, you can select any gene, using the search widget (case sensitive, so make sure you type the correct name). This information can be propagated to other panels...
+#FeatureAssayPlot1;... like this Feature Assay Plot, where the expression of a feature (a gene here) is plotted against any covariate of interest
+#FeatureAssayPlot1_XAxisColumnData + .selectize-control;Here you can change the value for the covariate to plot against
+#ReducedDimensionPlot2;Similarly, the expression of the selected gene can be overlaid on the UMAP plot. In the pre-selected configuration, you can see the clustered expression of KRT13 in surface epithelial cells.
+#ColumnDataPlot1;Here is a summary of the different annotated cell types, with a visual representation of an abundance table. This
+#ComplexHeatmapPlot1; This heatmap summarizes the two signatures expressed by basal and surface keratinocytes. You can change the selected features and lot more in the options below
+#FeatureAssayPlot2;Surface epithelium expressed the protease TMPRSS2, activating coronaviruses in other tissues
+#FeatureAssayPlot3;... but we did not detect the expression of the receptor ACE2
+#RowDataTable2;This table can be used to overlay the expression of any gene, e.g. the ones taken from the signatures presented in the later steps. Here we show how you can have multiple hits for a quick selection, namely all genes containing the LCE3 string - and use for example LCE3A, LCE3D, or LCE3E, as indicated in our manuscript
+#ReducedDimensionPlot3;In this case, we display the expression of LCE3E
+#ComplexHeatmapPlot2;This heatmap displays the signature for the Outer Surface, with the cornification and keratinization signatures
+#ComplexHeatmapPlot3;Here's the Crypt epithelial cells, with a selection of points that can additionally be provided by other panels. For example...
+#ColumnDataPlot1;... it can come from this Column Data Plot, and the selection can be updated at will. Also, it is possible to select any subset of cells from other panels - not displayed in this tour.
+#ComplexHeatmapPlot4;Finally, this is the overview on the FDCSP epithelium subset, where we can show that follicular dendritic cells have been detected in tonsillar tissues.
+#Thanks;Thank you for taking the tour on the epithelial cells subset of the Tonsil Data Atlas! Enjoy the exploration with <code>iSEE</code>!
