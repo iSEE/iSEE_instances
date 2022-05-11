@@ -62,9 +62,6 @@ sce <- tda_epithelial
 Go by hand first, then use this chunk of code to programmatically re-do it
 
 ```{r}
-iSEEu::modeEmpty(sce)
-
-
 initial <- list()
 
 ################################################################################
@@ -426,7 +423,7 @@ Do some by hand, then extract the code
 ## Adding a tour to tell things to people - they like to hear or read about the data!
 
 ```{r}
-
+tour_epithelial <- read.delim("tour_tda_epithelial.txt", sep = ";", header = TRUE)
 ```
 
 
@@ -439,6 +436,15 @@ This is just it 💣 💣 💣 💣 💣
 ```{r}
 iSEE(sce, initial = initial, appTitle = "iSEE ❤️ Tonsil Data Atlas - epithelial cells")
 ```
+
+To start the app with the tour running, you can just run this command:
+
+```{r}
+iSEE(sce, initial = initial, appTitle = "iSEE ❤️ Tonsil Data Atlas - epithelial cells",
+     tour = tour_epithelial)
+```
+
+
 
 # Session info
 
