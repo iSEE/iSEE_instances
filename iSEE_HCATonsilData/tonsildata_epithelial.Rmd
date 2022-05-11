@@ -144,7 +144,7 @@ initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "logcounts", X
         c(2L, 8L, 0L)), class = c("package_version", "numeric_version"
     ))), PanelId = c(FeatureAssayPlot = 1L), PanelHeight = 500L, 
     PanelWidth = 4L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
-    ColumnSelectionSource = "ReducedDimensionPlot1", DataBoxOpen = FALSE, 
+    ColumnSelectionSource = "ReducedDimensionPlot1", DataBoxOpen = TRUE, 
     RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
     RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
     SelectionHistory = list())
