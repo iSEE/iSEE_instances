@@ -1,0 +1,332 @@
+---
+title: "Code for generating an instance of iSEE for the HCA Tonsil Data atlas - T helper cells subset"
+author:
+- name: Federico Marini
+  affiliation: 
+  - &id1 Institute of Medical Biostatistics, Epidemiology and Informatics (IMBEI), Mainz
+  - Center for Thrombosis and Hemostasis (CTH), Mainz
+  email: marinif@uni-mainz.de
+date: "`r BiocStyle::doc_date()`"
+output: 
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# I have one minute to convince you
+
+
+```{r}
+devtools::install_github("massonix/HCATonsilData")
+library("HCATonsilData")
+
+tda_th <- HCATonsilData::HCATonsilData(cellType = "Th")
+```
+
+A default instance can be run with
+
+```{r}
+library("iSEE")
+iSEE(tda_th)
+```
+
+Then I would work on that, configure some panels, store the code to generate them, and have a fully fledged instance, as displayed below.
+
+
+# I have some more time to tell you the whole thing
+
+## Retrieving the data
+
+MORE on the data itself and how to get it
+
+## Loading packages
+
+```{r}
+library("HCATonsilData")
+
+tda_th <- HCATonsilData::HCATonsilData(cellType = "Th")
+
+library("iSEE")
+library("iSEEu")
+
+iSEEu::modeEmpty(tda_th)
+
+sce <- tda_th
+```
+
+
+## Configuring the app
+
+Go by hand first, then use this chunk of code to programmatically re-do it
+
+```{r}
+initial <- list()
+
+################################################################################
+# Settings for Reduced dimension plot 1
+################################################################################
+
+initial[["ReducedDimensionPlot1"]] <- new("ReducedDimensionPlot", Type = "UMAP", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "donor_id", FacetColumnByColData = "donor_id", 
+    ColorByColumnData = "annotation_20220215", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "donor_id", 
+    SizeByColumnData = "age", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "AL627309.1", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "donor_id", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 8L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = 1L, PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = TRUE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Row data table 1
+################################################################################
+
+initial[["RowDataTable1"]] <- new("RowDataTable", Selected = "IL7R", Search = "^IL[0-9]", SearchColumns = c("", 
+"", ""), HiddenColumns = character(0), VersionInfo = list(iSEE = structure(list(
+    c(2L, 8L, 0L)), class = c("package_version", "numeric_version"
+))), PanelId = 1L, PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 1
+################################################################################
+
+initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "logcounts", XAxis = "Column data", 
+    XAxisColumnData = "annotation_20220215", XAxisFeatureName = "AL627309.1", 
+    XAxisFeatureSource = "---", XAxisFeatureDynamicSource = FALSE, 
+    YAxisFeatureName = "IL7R", YAxisFeatureSource = "RowDataTable1", 
+    YAxisFeatureDynamicSource = FALSE, FacetRowByColData = "donor_id", 
+    FacetColumnByColData = "donor_id", ColorByColumnData = "barcode", 
+    ColorByFeatureNameAssay = "logcounts", ColorBySampleNameColor = "#FF0000", 
+    ShapeByColumnData = "donor_id", SizeByColumnData = "age", 
+    FacetRowBy = "None", FacetColumnBy = "None", ColorBy = "None", 
+    ColorByDefaultColor = "#000000", ColorByFeatureName = "AL627309.1", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = FALSE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "donor_id", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 8L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = 1L, PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = TRUE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 4
+################################################################################
+
+initial[["ReducedDimensionPlot4"]] <- new("ReducedDimensionPlot", Type = "UMAP", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "donor_id", FacetColumnByColData = "donor_id", 
+    ColorByColumnData = "barcode", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "donor_id", 
+    SizeByColumnData = "age", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Feature name", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "IL7R", ColorByFeatureSource = "RowDataTable1", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "donor_id", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 8L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = 4L, PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 2
+################################################################################
+
+initial[["ReducedDimensionPlot2"]] <- new("ReducedDimensionPlot", Type = "UMAP", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "annotation_20220215", FacetColumnByColData = "annotation_20220215", 
+    ColorByColumnData = "barcode", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "donor_id", 
+    SizeByColumnData = "age", FacetRowBy = "None", FacetColumnBy = "Column data", 
+    ColorBy = "Feature name", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "IL17A", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(xmin = -4.5054647964018, 
+        xmax = 3.9042641896378, ymin = -4.4549698044601, ymax = 3.6996570659977, 
+        panelvar1 = "Th0", coords_css = list(xmin = 41L, xmax = 194L, 
+            ymin = 41.5625, ymax = 409.5625), coords_img = list(
+            xmin = 82L, xmax = 388L, ymin = 83.125, ymax = 819.125), 
+        img_css_ratio = list(x = 2L, y = 2L), mapping = list(
+            x = "X", y = "Y", colour = "ColorBy", panelvar1 = "FacetColumn"), 
+        domain = list(left = -4.93653096679605, right = 4.46226429220282, 
+            bottom = -4.54128474219842, top = 3.70734678284125), 
+        range = list(left = 66.3150417380137, right = 408.303630672089, 
+            bottom = 826.915398651541, top = 82.4309606911768), 
+        log = list(x = NULL, y = NULL), direction = "xy", brushId = "ReducedDimensionPlot2_Brush", 
+        outputId = "ReducedDimensionPlot2"), VisualBoxOpen = TRUE, 
+    VisualChoices = c("Color", "Facet"), ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "donor_id", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 8L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 8L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Complex heatmap 1
+################################################################################
+
+initial[["ComplexHeatmapPlot1"]] <- new("ComplexHeatmapPlot", Assay = "logcounts", CustomRows = TRUE, 
+    CustomRowsText = "CCR4\nCCR5\nCCR6\nCXCR3\nGATA3\nGZMK\nIFNG\nIL10\nIL17A\nIL17F\nIL17RB\nIL22\nIL26\nIL7R\nRORC\nTBX21\nTNF", 
+    ClusterRows = TRUE, ClusterRowsDistance = "spearman", ClusterRowsMethod = "ward.D2", 
+    DataBoxOpen = TRUE, VisualChoices = "Annotations", ColumnData = "annotation_20220215", 
+    RowData = character(0), CustomBounds = FALSE, LowerBound = 0L, 
+    UpperBound = 0L, AssayCenterRows = FALSE, AssayScaleRows = FALSE, 
+    DivergentColormap = "blue < white < orange", ShowDimNames = "Rows", 
+    LegendPosition = "Bottom", LegendDirection = "Horizontal", 
+    VisualBoxOpen = TRUE, NamesRowFontSize = 10, NamesColumnFontSize = 10, 
+    ShowColumnSelection = TRUE, OrderColumnSelection = TRUE, 
+    VersionInfo = list(iSEE = structure(list(c(2L, 8L, 0L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 1L, PanelHeight = 500L, PanelWidth = 4L, 
+    SelectionBoxOpen = TRUE, RowSelectionSource = "---", ColumnSelectionSource = "ReducedDimensionPlot2", 
+    RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 3
+################################################################################
+
+initial[["ReducedDimensionPlot3"]] <- new("ReducedDimensionPlot", Type = "UMAP", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "donor_id", FacetColumnByColData = "donor_id", 
+    ColorByColumnData = "annotation_20220215", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "donor_id", 
+    SizeByColumnData = "age", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "AL627309.1", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = TRUE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "donor_id", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 8L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = 3L, PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = TRUE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "FeatureAssayPlot2", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 2
+################################################################################
+
+initial[["FeatureAssayPlot2"]] <- new("FeatureAssayPlot", Assay = "logcounts", XAxis = "Feature name", 
+    XAxisColumnData = "barcode", XAxisFeatureName = "IL17A", 
+    XAxisFeatureSource = "---", XAxisFeatureDynamicSource = FALSE, 
+    YAxisFeatureName = "IL7R", YAxisFeatureSource = "---", YAxisFeatureDynamicSource = FALSE, 
+    FacetRowByColData = "donor_id", FacetColumnByColData = "donor_id", 
+    ColorByColumnData = "barcode", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "donor_id", 
+    SizeByColumnData = "age", FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "None", ColorByDefaultColor = "#000000", ColorByFeatureName = "AL627309.1", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = FALSE, 
+    VisualChoices = "Color", ContourAdd = FALSE, ContourColor = "#0000FF", 
+    PointSize = 1, PointAlpha = 1, Downsample = FALSE, DownsampleResolution = 200, 
+    CustomLabels = FALSE, CustomLabelsText = "bw94nf57_vm85woki_AACCTGAAGTTTGGCT-1", 
+    FontSize = 1, LegendPointSize = 1, LegendPosition = "Bottom", 
+    HoverInfo = TRUE, LabelCenters = FALSE, LabelCentersBy = "donor_id", 
+    LabelCentersColor = "#000000", VersionInfo = list(iSEE = structure(list(
+        c(2L, 8L, 0L)), class = c("package_version", "numeric_version"
+    ))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = TRUE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+```
+
+
+## Figures figures figures
+
+Do some by hand, then extract the code
+
+```{r}
+
+```
+
+## Adding a tour to tell things to people - they like to hear or read about the data!
+
+```{r}
+tour_thelper <- read.delim("tour_tda_Thelper.txt", sep = ";", header = TRUE)
+```
+
+
+## Running the fully fledged instance of iSEE
+
+This is just it 💣 💣 💣 💣 💣 
+
+(and this is the line that starts the app, fully configured)
+
+```{r}
+iSEE(sce, initial = initial, appTitle = "iSEE ❤️ Tonsil Data Atlas - T helper cells")
+```
+
+To start the app with the tour running, you can just run this command:
+
+```{r}
+iSEE(sce, initial = initial, appTitle = "iSEE ❤️ Tonsil Data Atlas - T helper cells",
+     tour = tour_thelper)
+```
+
+
+
+# Session info
+
+```{r}
+sessionInfo()
+```
+
+
+
