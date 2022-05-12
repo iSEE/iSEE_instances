@@ -1,0 +1,17 @@
+element;intro
+#Welcome;Welcome to the HCA Tonsil Data Atlas instance for the T helper cells!
+#ReducedDimensionPlot1;After inspecting the whole set of CD4+ T cells, we focused on the subset of T helper cells. After re-performing clustering on this, we could identify six clusters.
+#ReducedDimensionPlot1_ColorBy;As selected in the Visual parameters widget, you can see that cells are colored in the UMAP according to their annotated cell type.
+#RowDataTable1;From this table, you can select any gene, using the search widget - this information can be propagated to other panels. In the current selection, we are searching for any gene starting with the pattern IL, followed by a number, good for identifying interleukins.
+#FeatureAssayPlot1;The selected feature is passed to this Feature Assay Plot, where the expression of a feature (a gene here) is plotted against any covariate of interest. In this case, the gene IL7R is pre-selected. 
+#ReducedDimensionPlot4;The UMAP plot is also displaying this information, coloring the dots of the scatter plot.
+#ReducedDimensionPlot2;This UMAP plot instead is showing the expression of another gene, IL17A, this time faceting the information over the different clusters to have small multiples that split up the global view - this is useful to ensure e.g. the selection of only one subpopulation from a cluster. In this case, a pre-selection has been performed, enclosing all the cells from the Th0 group. This is passed over to the upcoming panel... 
+#ComplexHeatmapPlot1;... which is a heatmap, including a comprehensive collection of markers for all the identified cell types. The ordering of the cells is defined by different settings:
+#ComplexHeatmapPlot1_ColumnData + .selectize-control;for example, the annotation of cell types...
+#ComplexHeatmapPlot1_ColumnSelectionSource + .selectize-control;... or in this case the selection of cells applied in another panel, here e.g. the reduced dimension plot to select all Th0.
+#ComplexHeatmapPlot1;All these settings, including of course the data itself, which can be specified via the Edit feature names functionality, define the final aspect of the heatmap in this panel.
+#ReducedDimensionPlot3;Again here is a UMAP plot, colored by the the annotated cluster. This plot is linked to the next panel, as visible from the Selection parameters - it will receive a selection in a form of in silico gating.
+#ReducedDimensionPlot3_ColumnSelectionSource + .selectize-control;Here you see where we will receive the selection from, and we move to that panel now.
+#FeatureAssayPlot2;Interestingly, the selection can happen from a Feature assay plot - it is immediate to select double-positive cells, or the ones expressing only one of the two proposed markers. You are invited to do so and see the changes propagate in the previous UMAP plot.
+#ReducedDimensionPlot3;So, upon selection of some cells, these are kept opaque while the ones not selected are made transparent to enhance the contrast for the subset of interest.´
+#Thanks;Thank you for taking the tour on the T helper cells subset of the Tonsil Data Atlas! Enjoy the exploration with <code>iSEE</code>!
