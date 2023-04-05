@@ -151,6 +151,46 @@ iSEE(sce,
 
 
 
+## Tal1 Chimera Data
+
+Alsu's dataset for the miloDE manuscript
+
+```{r}
+library("SingleCellExperiment")
+library("MouseGastrulationData")
+sce_chimera <- MouseGastrulationData::Tal1ChimeraData()
+# delete doublets and stripped
+sce_chimera <- sce_chimera[, !sce_chimera$celltype.mapped %in% c("Doublet" , "Stripped")]
+# delete row for tomato - technically it is not a feature and it is stored in coldata anyway
+sce_chimera <- sce_chimera[!rownames(sce_chimera) == "tomato-td" , ]
+
+sce_chimera
+```
+
+Adding normalized values and some TSNE/UMAP to make the summary also more visual
+
+```{r}
+sce_chimera <- logNormCounts(sce_chimera)
+
+library(scater)
+sce_chimera <- runTSNE(sce_chimera)
+sce_chimera <- runUMAP(sce_chimera)
+```
+
+### Launching iSEE
+
+```{r}
+library("iSEE")
+iSEE(sce_chimera, appTitle = "iSEE on the Tal1 dataset, used in the miloDE package manuscript")
+```
+
+... and maybe with a more complex config to show how this whole can start at once with a nice set of pre-configured panels:
+
+```{r}
+
+```
+
+
 # Session info {-}
 
 ```{r}
