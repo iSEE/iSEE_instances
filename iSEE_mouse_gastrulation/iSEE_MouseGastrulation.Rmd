@@ -187,7 +187,184 @@ iSEE(sce_chimera, appTitle = "iSEE on the Tal1 dataset, used in the miloDE packa
 ... and maybe with a more complex config to show how this whole can start at once with a nice set of pre-configured panels:
 
 ```{r}
+initial <- list()
 
+################################################################################
+# Settings for Reduced dimension plot 1
+################################################################################
+
+initial[["ReducedDimensionPlot1"]] <- new("ReducedDimensionPlot", Type = "TSNE", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "stage", FacetColumnByColData = "stage", 
+    ColorByColumnData = "stage.mapped", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "stage", 
+    SizeByColumnData = "sample", TooltipColumnData = character(0), 
+    FacetRowBy = "None", FacetColumnBy = "None", ColorBy = "Column data", 
+    ColorByDefaultColor = "#000000", ColorByFeatureName = "ENSMUSG00000051951", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "cell_1", ColorBySampleSource = "---", 
+    ColorBySampleDynamicSource = FALSE, ShapeBy = "None", SizeBy = "None", 
+    SelectionAlpha = 0.1, ZoomData = numeric(0), BrushData = list(), 
+    VisualBoxOpen = FALSE, VisualChoices = "Color", ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "cell_1", FontSize = 1, LegendPointSize = 1, 
+    LegendPosition = "Bottom", HoverInfo = TRUE, LabelCenters = FALSE, 
+    LabelCentersBy = "stage", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(ReducedDimensionPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Row data table 1
+################################################################################
+
+initial[["RowDataTable1"]] <- new("RowDataTable", Selected = "ENSMUSG00000026414", Search = "Tnnt", 
+    SearchColumns = c("", ""), HiddenColumns = character(0), 
+    VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(RowDataTable = 1L), PanelHeight = 500L, 
+    PanelWidth = 4L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
+    ColumnSelectionSource = "---", DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, 
+    ColumnSelectionDynamicSource = FALSE, RowSelectionRestrict = FALSE, 
+    ColumnSelectionRestrict = FALSE, SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 1
+################################################################################
+
+initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "logcounts", XAxis = "Column data", 
+    XAxisColumnData = "stage.mapped", XAxisFeatureName = "ENSMUSG00000051951", 
+    XAxisFeatureSource = "---", XAxisFeatureDynamicSource = FALSE, 
+    YAxisFeatureName = "ENSMUSG00000026414", YAxisFeatureSource = "RowDataTable1", 
+    YAxisFeatureDynamicSource = FALSE, FacetRowByColData = "tomato", 
+    FacetColumnByColData = "stage", ColorByColumnData = "tomato", 
+    ColorByFeatureNameAssay = "logcounts", ColorBySampleNameColor = "#FF0000", 
+    ShapeByColumnData = "stage", SizeByColumnData = "sample", 
+    TooltipColumnData = character(0), FacetRowBy = "Column data", 
+    FacetColumnBy = "None", ColorBy = "Column data", ColorByDefaultColor = "#000000", 
+    ColorByFeatureName = "ENSMUSG00000051951", ColorByFeatureSource = "---", 
+    ColorByFeatureDynamicSource = FALSE, ColorBySampleName = "cell_1", 
+    ColorBySampleSource = "---", ColorBySampleDynamicSource = FALSE, 
+    ShapeBy = "None", SizeBy = "None", SelectionAlpha = 0.1, 
+    ZoomData = numeric(0), BrushData = list(), VisualBoxOpen = FALSE, 
+    VisualChoices = c("Color", "Facet"), ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "cell_1", FontSize = 1, LegendPointSize = 1, 
+    LegendPosition = "Bottom", HoverInfo = TRUE, LabelCenters = FALSE, 
+    LabelCentersBy = "stage", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(FeatureAssayPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Reduced dimension plot 2
+################################################################################
+
+initial[["ReducedDimensionPlot2"]] <- new("ReducedDimensionPlot", Type = "TSNE", XAxis = 1L, YAxis = 2L, 
+    FacetRowByColData = "tomato", FacetColumnByColData = "tomato", 
+    ColorByColumnData = "celltype.mapped", ColorByFeatureNameAssay = "logcounts", 
+    ColorBySampleNameColor = "#FF0000", ShapeByColumnData = "stage", 
+    SizeByColumnData = "sample", TooltipColumnData = character(0), 
+    FacetRowBy = "None", FacetColumnBy = "Column data", ColorBy = "Column data", 
+    ColorByDefaultColor = "#000000", ColorByFeatureName = "ENSMUSG00000051951", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "cell_1", ColorBySampleSource = "---", 
+    ColorBySampleDynamicSource = FALSE, ShapeBy = "None", SizeBy = "None", 
+    SelectionAlpha = 0.1, ZoomData = numeric(0), BrushData = list(
+        xmin = -25.052183846846, xmax = 10.598819991308, ymin = -31.764029484869, 
+        ymax = -14.436715080257, panelvar1 = TRUE, coords_css = list(
+            xmin = 330L, xmax = 450L, ymin = 307.21875, ymax = 394.21875), 
+        coords_img = list(xmin = 660L, xmax = 900L, ymin = 614.4375, 
+            ymax = 788.4375), img_css_ratio = list(x = 2L, y = 2L), 
+        mapping = list(x = "X", y = "Y", colour = "ColorBy", 
+            panelvar1 = "FacetColumn"), domain = list(left = -35.9548832378364, 
+            right = 37.93736089117, bottom = -35.4392733237053, 
+            top = 38.6383366883993), range = list(left = 586.603809931507, 
+            right = 1084.04109589041, bottom = 825.344109589041, 
+            top = 81.4605601178167), log = list(x = NULL, y = NULL), 
+        direction = "xy", brushId = "ReducedDimensionPlot2_Brush", 
+        outputId = "ReducedDimensionPlot2"), VisualBoxOpen = TRUE, 
+    VisualChoices = c("Color", "Facet"), ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "cell_1", FontSize = 1, LegendPointSize = 1, 
+    LegendPosition = "Bottom", HoverInfo = TRUE, LabelCenters = FALSE, 
+    LabelCentersBy = "stage", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 4L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Feature assay plot 2
+################################################################################
+
+initial[["FeatureAssayPlot2"]] <- new("FeatureAssayPlot", Assay = "logcounts", XAxis = "Column data", 
+    XAxisColumnData = "tomato", XAxisFeatureName = "ENSMUSG00000051951", 
+    XAxisFeatureSource = "---", XAxisFeatureDynamicSource = FALSE, 
+    YAxisFeatureName = "ENSMUSG00000034664", YAxisFeatureSource = "---", 
+    YAxisFeatureDynamicSource = FALSE, FacetRowByColData = "stage", 
+    FacetColumnByColData = "stage", ColorByColumnData = "cell", 
+    ColorByFeatureNameAssay = "logcounts", ColorBySampleNameColor = "#FF0000", 
+    ShapeByColumnData = "stage", SizeByColumnData = "sample", 
+    TooltipColumnData = character(0), FacetRowBy = "None", FacetColumnBy = "None", 
+    ColorBy = "None", ColorByDefaultColor = "#000000", ColorByFeatureName = "ENSMUSG00000051951", 
+    ColorByFeatureSource = "---", ColorByFeatureDynamicSource = FALSE, 
+    ColorBySampleName = "cell_1", ColorBySampleSource = "---", 
+    ColorBySampleDynamicSource = FALSE, ShapeBy = "None", SizeBy = "None", 
+    SelectionAlpha = 0.1, ZoomData = numeric(0), BrushData = list(), 
+    VisualBoxOpen = FALSE, VisualChoices = "Color", ContourAdd = FALSE, 
+    ContourColor = "#0000FF", PointSize = 1, PointAlpha = 1, 
+    Downsample = FALSE, DownsampleResolution = 200, CustomLabels = FALSE, 
+    CustomLabelsText = "cell_1", FontSize = 1, LegendPointSize = 1, 
+    LegendPosition = "Bottom", HoverInfo = TRUE, LabelCenters = FALSE, 
+    LabelCentersBy = "stage", LabelCentersColor = "#000000", 
+    VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
+    "numeric_version"))), PanelId = 2L, PanelHeight = 500L, PanelWidth = 4L, 
+    SelectionBoxOpen = FALSE, RowSelectionSource = "---", ColumnSelectionSource = "---", 
+    DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+################################################################################
+# Settings for Complex heatmap 1
+################################################################################
+
+initial[["ComplexHeatmapPlot1"]] <- new("ComplexHeatmapPlot", Assay = "logcounts", CustomRows = TRUE, 
+    CustomRowsText = "ENSMUSG00000034664\nENSMUSG00000028717\nENSMUSG00000026414\n", 
+    ClusterRows = FALSE, ClusterRowsDistance = "spearman", ClusterRowsMethod = "ward.D2", 
+    DataBoxOpen = FALSE, VisualChoices = "Annotations", ColumnData = "tomato", 
+    RowData = character(0), CustomBounds = FALSE, LowerBound = NA_real_, 
+    UpperBound = NA_real_, AssayCenterRows = TRUE, AssayScaleRows = FALSE, 
+    DivergentColormap = "blue < white < orange", ShowDimNames = "Rows", 
+    LegendPosition = "Bottom", LegendDirection = "Horizontal", 
+    VisualBoxOpen = FALSE, NamesRowFontSize = 10, NamesColumnFontSize = 10, 
+    ShowColumnSelection = TRUE, OrderColumnSelection = TRUE, 
+    VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
+    "numeric_version"))), PanelId = c(ComplexHeatmapPlot = 1L), 
+    PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    RowSelectionSource = "---", ColumnSelectionSource = "ReducedDimensionPlot2", 
+    RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
+    RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
+    SelectionHistory = list())
+
+initial_tal1
+
+registerAppOptions(sce, color.maxlevels=40)
+
+iSEE(sce_chimera,
+     initial = initial_tal1,
+     appTitle = "iSEE the Embryo Atlas data")
 ```
 
 
