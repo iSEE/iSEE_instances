@@ -34,6 +34,7 @@ AtlasSampleMetadata
 sce <- EmbryoAtlasData(samples = 21)
 sce
 
+
 singlets <- which(!(colData(sce)$doublet | colData(sce)$stripped))
 plot(
     x = reducedDim(sce, "umap")[singlets, 1],
@@ -86,7 +87,7 @@ initial[["ReducedDimensionPlot1"]] <- new("ReducedDimensionPlot", Type = "umap",
     LabelCentersBy = "stage", LabelCentersColor = "#000000", 
     VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
     "numeric_version"))), PanelId = c(ReducedDimensionPlot = 1L), 
-    PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    PanelHeight = 500L, PanelWidth = 6L, SelectionBoxOpen = FALSE, 
     RowSelectionSource = "---", ColumnSelectionSource = "---", 
     DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
     RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
@@ -100,7 +101,7 @@ initial[["RowDataTable1"]] <- new("RowDataTable", Selected = "ENSMUSG00000025903
     SearchColumns = c("", ""), HiddenColumns = character(0), 
     VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
     "numeric_version"))), PanelId = c(RowDataTable = 1L), PanelHeight = 500L, 
-    PanelWidth = 4L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
+    PanelWidth = 3L, SelectionBoxOpen = FALSE, RowSelectionSource = "---", 
     ColumnSelectionSource = "---", DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, 
     ColumnSelectionDynamicSource = FALSE, RowSelectionRestrict = FALSE, 
     ColumnSelectionRestrict = FALSE, SelectionHistory = list())
@@ -131,15 +132,22 @@ initial[["FeatureAssayPlot1"]] <- new("FeatureAssayPlot", Assay = "counts", XAxi
     LabelCentersBy = "stage", LabelCentersColor = "#000000", 
     VersionInfo = list(iSEE = structure(list(c(2L, 11L, 4L)), class = c("package_version", 
     "numeric_version"))), PanelId = c(FeatureAssayPlot = 1L), 
-    PanelHeight = 500L, PanelWidth = 4L, SelectionBoxOpen = FALSE, 
+    PanelHeight = 500L, PanelWidth = 3L, SelectionBoxOpen = FALSE, 
     RowSelectionSource = "---", ColumnSelectionSource = "---", 
     DataBoxOpen = FALSE, RowSelectionDynamicSource = FALSE, ColumnSelectionDynamicSource = FALSE, 
     RowSelectionRestrict = FALSE, ColumnSelectionRestrict = FALSE, 
     SelectionHistory = list())
 
+initial_embryo <- initial
 
+initial_embryo
+
+registerAppOptions(sce, color.maxlevels=30)
+
+iSEE(sce,
+     initial = initial_embryo,
+     appTitle = "iSEE the Embryo Atlas data")
 ```
-
 
 
 
